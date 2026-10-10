@@ -1,0 +1,203 @@
+{
+  "_metadata": {
+    "name": "Business Administration: Information Systems Analytics, BBA"
+  },
+  "ECON 2103": {
+    "name": "Principles of Microeconomics",
+    "credits": 3,
+    "category": "General Education",
+    "prereqs": []
+  },
+  "ACCT 2113": {
+    "name": "Survey of Accounting",
+    "credits": 3,
+    "category": "Business Core",
+    "prereqs": []
+  },
+  "ACCT 2003": {
+    "name": "Principles of Accounting",
+    "credits": 3,
+    "category": "Business Core",
+    "prereqs": []
+  },
+  "FIN 2003": {
+    "name": "Personal Finance",
+    "credits": 3,
+    "category": "Business Core",
+    "prereqs": []
+  },
+  "ECON 2203": {
+    "name": "Principles of Macroeconomics",
+    "credits": 3,
+    "category": "Business Core",
+    "prereqs": []
+  },
+  "GBUS 2003": {
+    "name": "Legal Environment of Business",
+    "credits": 3,
+    "category": "Business Core",
+    "prereqs": []
+  },
+  "GBUS 2013": {
+    "name": "Statistics and Analytics I",
+    "credits": 3,
+    "category": "Business Core",
+    "prereqs": []
+  },
+  "IS 2053": {
+    "name": "Business Information Systems",
+    "credits": 3,
+    "category": "Business Core",
+    "prereqs": []
+  },
+  "MGMT 2003": {
+    "name": "Business Communications",
+    "credits": 3,
+    "category": "Business Core",
+    "prereqs": []
+  },
+  "FIN 3003": {
+    "name": "Financial Management",
+    "credits": 3,
+    "category": "Business Core",
+    "prereqs": ["ACCT 2003"]
+  },
+  "GBUS 3183": {
+    "name": "Statistics and Analytics II",
+    "credits": 3,
+    "category": "Business Core",
+    "prereqs": ["GBUS 2013"]
+  },
+  "IS 3023": {
+    "name": "Introduction to Data Visualization",
+    "credits": 3,
+    "category": "Business Core",
+    "prereqs": ["IS 2053"]
+  },
+  "IS 3053": {
+    "name": "Managing Information Systems",
+    "credits": 3,
+    "category": "Business Core",
+    "prereqs": ["IS 2053"]
+  },
+  "MGMT 3023": {
+    "name": "Organizational Theory and Behavior",
+    "credits": 3,
+    "category": "Business Core",
+    "prereqs": []
+  },
+  "MGMT 3073": {
+    "name": "Professional Communication Strategies",
+    "credits": 3,
+    "category": "Business Core",
+    "prereqs": ["MGMT 2003"]
+  },
+  "MGMT 4063": {
+    "name": "Operations and Supply Chain Management",
+    "credits": 3,
+    "category": "Business Core",
+    "prereqs": ["GBUS 2013"]
+  },
+  "MGMT 4093": {
+    "name": "Management Strategy and Policy",
+    "credits": 3,
+    "category": "Business Core",
+    "prereqs": ["FIN 3003", "MKTG 3033", "MGMT 3023"]
+  },
+  "MKTG 3033": {
+    "name": "Principles of Marketing",
+    "credits": 3,
+    "category": "Business Core",
+    "prereqs": []
+  },
+  "MGMT 4043": {
+    "name": "International Business",
+    "credits": 3,
+    "category": "Business Core",
+    "prereqs": []
+  },
+  "IS 3403": {
+    "name": "Database Management Systems",
+    "credits": 3,
+    "category": "Information Systems Analytics",
+    "prereqs": ["IS 2053"]
+  },
+  "IS 4213": {
+    "name": "Systems Analysis and Design",
+    "credits": 3,
+    "category": "Information Systems Analytics",
+    "prereqs": ["IS 2053"]
+  },
+  "IS 4323": {
+    "name": "Information Systems Analytics",
+    "credits": 3,
+    "category": "Information Systems Analytics",
+    "prereqs": ["IS 2053"]
+  },
+  "IS 4313": {
+    "name": "Data Visualization",
+    "credits": 3,
+    "category": "Information Systems Analytics",
+    "prereqs": ["IS 3023"]
+  },
+  "SCM 3043": {
+    "name": "Business Analytics",
+    "credits": 3,
+    "category": "Information Systems Analytics",
+    "prereqs": ["GBUS 2013"]
+  },
+  "ECON 3093": {
+    "name": "Economic Analysis for Decision-Making",
+    "credits": 3,
+    "category": "Information Systems Analytics Electives",
+    "prereqs": ["ECON 2103"]
+  },
+  "IS 3003": {
+    "name": "Website Development for Business and Commerce",
+    "credits": 3,
+    "category": "Information Systems Analytics Electives",
+    "prereqs": ["IS 2053"]
+  },
+  "IS 3063": {
+    "name": "Accounting Information Systems",
+    "credits": 3,
+    "category": "Information Systems Analytics Electives",
+    "prereqs": ["ACCT 2003", "IS 2053"]
+  },
+  "IS 3413": {
+    "name": "Social Media for Business",
+    "credits": 3,
+    "category": "Information Systems Analytics Electives",
+    "prereqs": []
+  },
+  "IS 3983": {
+    "name": "Business Internship in Information Systems",
+    "credits": 3,
+    "category": "Information Systems Analytics Electives",
+    "prereqs": []
+  },
+  "CSCI 2103": {
+    "name": "Computer Science I / Object-Oriented Programming",
+    "credits": 3,
+    "category": "Information Systems Analytics Electives",
+    "prereqs": []
+  },
+  "SCM 3033": {
+    "name": "Supply Chain Management Technology",
+    "credits": 3,
+    "category": "Information Systems Analytics Electives",
+    "prereqs": []
+  },
+  "ELEC 1003": {
+    "name": "General Elective I",
+    "credits": 3,
+    "category": "General Electives",
+    "prereqs": []
+  },
+  "ELEC 1002": {
+    "name": "General Elective II",
+    "credits": 2,
+    "category": "General Electives",
+    "prereqs": []
+  }
+}

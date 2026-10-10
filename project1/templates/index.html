@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAU Degree Planner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-sky-100/70 text-slate-800 min-h-screen p-6 md:p-8">
+    <div class="max-w-7xl mx-auto space-y-6">
+
+        <!-- App Header Banner (SAU Blue & Mulerider Gold Accents with Logo) -->
+        <header class="bg-gradient-to-r from-sky-200 via-sky-100 to-amber-100 p-6 rounded-2xl shadow-sm border border-sky-300 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <!-- SAU Logo -->
+                <img src="{{ url_for('static', filename='SAU_Logo_NoText_RGB-ai-2.png') }}"
+                     alt="SAU Logo"
+                     class="h-12 md:h-14 w-auto object-contain drop-shadow-sm">
+
+                <div class="space-y-1">
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-2xl md:text-3xl font-extrabold text-sky-950 tracking-tight">Degree Plan</h1>
+                    </div>
+                    <p class="text-xs text-sky-900/80 font-medium">Southern Arkansas University • Major/STEM core requires <strong>C or higher</strong> | Gen Ed requires <strong>D or higher</strong></p>
+                </div>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+            <!-- Sidebar Controls (5 Cols) -->
+            <div class="lg:col-span-5 bg-white p-6 rounded-2xl shadow-sm border border-sky-200 h-fit space-y-5">
+
+                {% if not catalog %}
+                <div class="bg-amber-50 border border-amber-300 text-amber-900 p-3 rounded-xl text-xs">
+                    <strong>Notice:</strong> Could not load course catalog for this major.
+                </div>
+                {% endif %}
+
+                <form method="POST" action="/" id="planForm" class="space-y-4">
+
+                    <!-- Major / Degree Program Selector -->
+                    <div>
+                        <label class="block text-xs font-extrabold text-sky-950 mb-1.5">Degree Program</label>
+                        <select name="degree" onchange="this.form.submit()" class="w-full p-2.5 text-xs bg-amber-100/60 border border-amber-300 font-bold text-amber-950 rounded-xl focus:ring-2 focus:ring-amber-400 focus:outline-none cursor-pointer">
+                            {% for key, prog in degree_programs.items() %}
+                            <option value="{{ key }}" {% if selected_degree == key %}selected{% endif %}>{{ prog.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Starting Term & Year Selection -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-extrabold text-sky-950 mb-1.5">Start Semester</label>
+                            <select name="start_term" class="w-full p-2.5 text-xs bg-sky-50 border border-sky-200 rounded-xl focus:ring-2 focus:ring-sky-300 focus:outline-none font-medium">
+                                <option value="Fall" {% if start_term == 'Fall' %}selected{% endif %}>Fall</option>
+                                <option value="Spring" {% if start_term == 'Spring' %}selected{% endif %}>Spring</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-extrabold text-sky-950 mb-1.5">Start Year</label>
+                            <select name="start_year" class="w-full p-2.5 text-xs bg-sky-50 border border-sky-200 rounded-xl focus:ring-2 focus:ring-sky-300 focus:outline-none font-medium">
+                                {% for y in range(2025, 2033) %}
+                                <option value="{{ y }}" {% if start_year == y %}selected{% endif %}>{{ y }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Max Credits Input -->
+                    <div>
+                        <label class="block text-xs font-extrabold text-sky-950 mb-1.5">Max Credits / Semester</label>
+                        <input type="number" name="max_credits" value="{{ max_credits }}" min="6" max="24"
+                               class="w-full p-2.5 text-xs bg-sky-50 border border-sky-200 rounded-xl focus:ring-2 focus:ring-sky-300 focus:outline-none font-medium">
+                    </div>
+
+                    <!-- Categorized Courses, Grades & Earliest Semesters -->
+                    <div>
+                        <div class="flex justify-between items-center mb-1.5">
+                            <label class="block text-xs font-extrabold text-sky-950">Courses, Grades & Scheduling Preferences</label>
+                        </div>
+
+                        <div class="space-y-2 max-h-[30rem] overflow-y-auto p-2 bg-sky-50/60 rounded-xl border border-sky-200">
+
+                            {% for cat_name, courses in categorized_catalog.items() %}
+                            {% set req_grade, _ = get_min_passing_score(cat_name) %}
+                            <details class="group bg-white rounded-xl border border-sky-200 overflow-hidden shadow-sm" open>
+                                <summary class="font-bold text-xs text-sky-950 p-2.5 bg-sky-100/70 hover:bg-sky-100 cursor-pointer flex justify-between items-center transition">
+                                    <div class="flex items-center gap-2">
+                                        <span>{{ cat_name }}</span>
+                                        <span class="text-[10px] bg-amber-200/80 text-amber-950 px-1.5 py-0.5 rounded font-bold border border-amber-300">
+                                            Req: &ge; {{ req_grade }}
+                                        </span>
+                                    </div>
+                                    <span class="text-[10px] bg-sky-200 text-sky-950 px-2 py-0.5 rounded-full font-bold">{{ courses|length }}</span>
+                                </summary>
+
+                                <div class="p-2 space-y-2.5 bg-white">
+                                    {% for code, details in courses %}
+                                    <div class="p-2 rounded-lg bg-sky-50/40 border border-sky-100 hover:border-sky-300 transition space-y-2">
+
+                                        <!-- Course Header -->
+                                        <div class="flex justify-between items-start gap-2">
+                                            <div class="min-w-0">
+                                                <div class="font-bold text-slate-900 text-xs truncate">{{ code }}</div>
+                                                <div class="text-[11px] text-slate-600 truncate">{{ details.name }} ({{ details.credits }} cr)</div>
+                                                {% if details.prereqs %}
+                                                <div class="text-[10px] text-sky-800 font-semibold">Prereqs: {{ details.prereqs | join(', ') }}</div>
+                                                {% endif %}
+                                                {% if details.offered %}
+                                                <div class="text-[10px] text-amber-900 font-semibold">Offered: {{ details.offered | join(', ') }}</div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+
+                                        <!-- Form Inputs (Grade & Earliest Term) -->
+                                        <div class="grid grid-cols-2 gap-2 pt-1 border-t border-sky-100/80">
+                                            <div>
+                                                <label class="block text-[10px] font-bold text-sky-900 mb-0.5">Completed Grade</label>
+                                                <select name="grade_{{ code }}" class="w-full p-1.5 text-xs bg-white border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-300 font-semibold text-sky-950">
+                                                    <option value="NONE" {% if user_grades.get(code) == 'NONE' or not user_grades.get(code) %}selected{% endif %}>Not Taken</option>
+                                                    <option value="A" {% if user_grades.get(code) == 'A' %}selected{% endif %}>Grade: A</option>
+                                                    <option value="B" {% if user_grades.get(code) == 'B' %}selected{% endif %}>Grade: B</option>
+                                                    <option value="C" {% if user_grades.get(code) == 'C' %}selected{% endif %}>Grade: C</option>
+                                                    <option value="D" {% if user_grades.get(code) == 'D' %}selected{% endif %}>Grade: D</option>
+                                                    <option value="F" {% if user_grades.get(code) == 'F' %}selected{% endif %}>Grade: F</option>
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <label class="block text-[10px] font-bold text-amber-950 mb-0.5">Earliest Term</label>
+                                                <select name="pref_{{ code }}" class="w-full p-1.5 text-xs bg-amber-50/80 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-400 font-semibold text-amber-950">
+                                                    <option value="AUTO" {% if preferred_terms.get(code) == 'AUTO' or not preferred_terms.get(code) %}selected{% endif %}>Auto (as soon as possible)</option>
+                                                    {% for term_opt in upcoming_terms %}
+                                                    <option value="{{ term_opt }}" {% if preferred_terms.get(code) == term_opt %}selected{% endif %}>{{ term_opt }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </details>
+                            {% endfor %}
+
+                        </div>
+                    </div>
+
+                    <button type="submit" name="action" value="generate"
+                            class="w-full bg-amber-300 hover:bg-amber-400 text-amber-950 font-black py-2.5 text-xs rounded-xl shadow-sm border border-amber-400 transition {% if catalog %}cursor-pointer{% else %}opacity-50 cursor-not-allowed{% endif %}"
+                            {% if not catalog %}disabled{% endif %}>
+                        Generate Degree Schedule
+                    </button>
+                </form>
+
+                {% if schedule %}
+                <form method="POST" action="/export_pdf">
+                    <input type="hidden" name="degree" value="{{ selected_degree }}">
+                    <input type="hidden" name="start_term" value="{{ start_term }}">
+                    <input type="hidden" name="start_year" value="{{ start_year }}">
+                    <input type="hidden" name="max_credits" value="{{ max_credits }}">
+                    {% for code, grade in user_grades.items() %}
+                    <input type="hidden" name="grade_{{ code }}" value="{{ grade }}">
+                    {% endfor %}
+                    {% for code, pref in preferred_terms.items() %}
+                    <input type="hidden" name="pref_{{ code }}" value="{{ pref }}">
+                    {% endfor %}
+                    <button type="submit" class="w-full bg-sky-200 hover:bg-sky-300 text-sky-950 font-black py-2.5 text-xs rounded-xl shadow-sm border border-sky-300 transition cursor-pointer">
+                        Export Schedule as PDF
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+
+            <!-- Schedule Display Area (7 Cols) -->
+            <div class="lg:col-span-7 space-y-4">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-lg font-black text-sky-950">Optimized Schedule — {{ degree_name }}</h2>
+                    {% if completed_courses %}
+                    <span class="text-xs bg-sky-200/80 text-sky-950 border border-sky-300 px-3 py-1 rounded-full font-extrabold">
+                        {{ completed_courses|length }} Courses Passed
+                    </span>
+                    {% endif %}
+                </div>
+
+                <!-- Warning Alert for Repeating Failed Courses -->
+                {% if failed_courses %}
+                <div class="bg-amber-100/90 border border-amber-300 text-amber-950 p-4 rounded-2xl text-xs space-y-1 shadow-sm">
+                    <div class="font-extrabold flex items-center gap-1.5">
+                        <span>⚠️ Minimum Grade Not Met (Must Retake):</span>
+                    </div>
+                    <ul class="list-disc list-inside space-y-0.5 text-amber-900 font-medium">
+                        {% for code, grade, req in failed_courses %}
+                        <li><strong>{{ code }}</strong>: Grade received <code>{{ grade }}</code> (Requires <code>&ge; {{ req }}</code>)</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <!-- Warning Alert for Courses That Could Not Be Scheduled -->
+                {% if unscheduled %}
+                <div class="bg-rose-50 border border-rose-300 text-rose-950 p-4 rounded-2xl text-xs space-y-1 shadow-sm">
+                    <div class="font-extrabold flex items-center gap-1.5">
+                        <span>⚠️ Could Not Be Scheduled:</span>
+                    </div>
+                    <ul class="list-disc list-inside space-y-0.5 text-rose-900 font-medium">
+                        {% for item in unscheduled %}
+                        <li><strong>{{ item.code }}</strong> — {{ item.name }}: {{ item.reason }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                {% if schedule %}
+                    {% for sem in schedule %}
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-sky-200 space-y-3">
+                        <div class="flex justify-between items-center pb-2.5 border-b border-sky-100">
+                            <h3 class="font-extrabold text-sm text-sky-950">{{ sem.term }}</h3>
+                            <span class="bg-amber-200/80 text-amber-950 border border-amber-300 text-[11px] font-black px-2.5 py-0.5 rounded-full">
+                                {{ sem.credits }} Credits
+                            </span>
+                        </div>
+                        <ul class="divide-y divide-sky-100 text-xs">
+                            {% for course in sem.courses %}
+                            <li class="py-2 flex justify-between items-center">
+                                <div>
+                                    <strong class="text-slate-900 font-bold">{{ course.code }}</strong>
+                                    <span class="text-slate-600">— {{ course.name }}</span>
+                                </div>
+                                <span class="bg-sky-50 text-sky-900 font-bold px-2 py-0.5 rounded-md text-[11px] border border-sky-200">
+                                    {{ course.credits }} cr
+                                </span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="bg-white p-12 rounded-2xl border border-dashed border-sky-300 text-center text-slate-400 space-y-2">
+                        <p class="text-sm font-medium">Select your degree program, set grades or semester preferences, and click <strong class="text-amber-900">Generate Degree Schedule</strong>.</p>
+                    </div>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>
