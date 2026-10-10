@@ -430,10 +430,49 @@
     <!-- THEME END -->
 </head>
 <body class="bg-sky-100/70 text-slate-800 min-h-screen p-6 md:p-8">
+{% macro mission_content() %}
+        <div class="space-y-4">
+            <span class="inline-block text-[10px] bg-amber-200/80 text-amber-950 px-2 py-0.5 rounded-full font-black border border-amber-300 tracking-wide uppercase">Our Mission</span>
+            <p class="text-base md:text-lg font-black text-sky-950 leading-snug">
+                Get every SAU student to graduation by the shortest, clearest path &mdash; with no wasted semesters, no wasted tuition, and no guesswork.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div class="bg-sky-50/60 border border-sky-100 rounded-xl p-3 space-y-1.5">
+                    <div class="flex items-center gap-2">
+                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-sky-200 text-sky-950 shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+                        </span>
+                        <h3 class="text-xs font-extrabold text-sky-950">Save time</h3>
+                    </div>
+                    <p class="text-[11px] leading-relaxed text-slate-600">Courses that unlock the most other courses are placed first, so a late prerequisite never quietly adds a semester.</p>
+                </div>
+                <div class="bg-sky-50/60 border border-sky-100 rounded-xl p-3 space-y-1.5">
+                    <div class="flex items-center gap-2">
+                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-sky-200 text-sky-950 shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M14.8 9.2c-.4-.8-1.4-1.2-2.6-1.2-1.4 0-2.5.8-2.5 1.9 0 2.6 5.2 1.3 5.2 3.9 0 1.1-1.2 1.9-2.6 1.9-1.2 0-2.2-.5-2.6-1.3M12 6v2m0 8v2"/></svg>
+                        </span>
+                        <h3 class="text-xs font-extrabold text-sky-950">Save money</h3>
+                    </div>
+                    <p class="text-[11px] leading-relaxed text-slate-600">Plans are built from your degree's course list, and retakes and gaps are flagged up front, before they turn into extra tuition.</p>
+                </div>
+                <div class="bg-sky-50/60 border border-sky-100 rounded-xl p-3 space-y-1.5">
+                    <div class="flex items-center gap-2">
+                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-sky-200 text-sky-950 shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M6 17V9a3 3 0 0 1 3-3h4M18 7v8a3 3 0 0 1-3 3h-4"/></svg>
+                        </span>
+                        <h3 class="text-xs font-extrabold text-sky-950">Cut the confusion</h3>
+                    </div>
+                    <p class="text-[11px] leading-relaxed text-slate-600">One semester-by-semester plan, a prerequisite map, and a plain-language reason for anything that can't be placed.</p>
+                </div>
+            </div>
+            <p class="text-[10px] text-slate-500">A planning aid, not an official record. Review every plan with your advisor and the current catalog before registering.</p>
+        </div>
+{% endmacro %}
+
     <div class="max-w-7xl mx-auto space-y-6">
 
         <!-- App Header Banner (SAU Blue & Mulerider Gold Accents with Logo) -->
-        <header class="bg-gradient-to-r from-sky-200 via-sky-100 to-amber-100 p-6 rounded-2xl shadow-sm border border-sky-300 flex items-center justify-between">
+        <header class="bg-gradient-to-r from-sky-200 via-sky-100 to-amber-100 p-6 rounded-2xl shadow-sm border border-sky-300 flex flex-wrap items-center justify-between gap-4">
             <div class="flex items-center gap-4">
                 <!-- SAU Logo -->
                 <img src="{{ url_for('static', filename='SAU_Logo_NoText_RGB-ai-2.png') }}"
@@ -448,6 +487,14 @@
                 </div>
             </div>
 
+            <div class="flex items-center gap-2 shrink-0">
+            <!-- Mission pop-up -->
+            <button id="missionBtn" type="button" aria-haspopup="dialog"
+                    class="shrink-0 inline-flex items-center gap-2 bg-white/70 hover:bg-white text-sky-950 text-xs font-bold px-3 py-2 rounded-xl border border-sky-300 shadow-sm transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-sky-300">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 22V4M4 4h13l-2 4 2 4H4"/></svg>
+                <span>Our Mission</span>
+            </button>
+
             <!-- Light / dark mode toggle -->
             <button id="themeToggle" type="button" aria-pressed="false" aria-label="Switch to dark mode"
                     class="shrink-0 inline-flex items-center gap-2 bg-white/70 hover:bg-white text-sky-950 text-xs font-bold px-3 py-2 rounded-xl border border-sky-300 shadow-sm transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-sky-300">
@@ -455,6 +502,7 @@
                 <svg id="themeIconSun" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
                 <span id="themeToggleLabel">Dark mode</span>
             </button>
+            </div>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -967,6 +1015,38 @@
     })();
     </script>
     {% endif %}
+
+    <!-- Mission dialog (native <dialog>: Esc closes it, focus is trapped and then returned to the button) -->
+    <dialog id="missionDialog" aria-label="Our mission"
+            class="m-auto w-[min(44rem,calc(100%-2rem))] max-h-[calc(100%-2rem)] overflow-y-auto rounded-2xl border border-sky-200 bg-white p-0 text-slate-800 shadow-2xl backdrop:bg-black/50">
+        <div class="relative p-6">
+            <button id="missionClose" type="button" aria-label="Close"
+                    class="absolute top-4 right-4 inline-flex items-center justify-center w-8 h-8 rounded-full bg-sky-100 hover:bg-sky-200 text-sky-950 border border-sky-200 transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-sky-300">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+            </button>
+            {{ mission_content() }}
+        </div>
+    </dialog>
+
+    <script>
+    (function () {
+        var dlg = document.getElementById("missionDialog"), openBtn = document.getElementById("missionBtn"), closeBtn = document.getElementById("missionClose");
+        if (!dlg || !openBtn) return;
+        function open() {
+            if (typeof dlg.showModal === "function") dlg.showModal(); else dlg.setAttribute("open", "");
+            document.documentElement.style.overflow = "hidden";
+        }
+        function close() {
+            if (typeof dlg.close === "function") dlg.close(); else dlg.removeAttribute("open");
+            document.documentElement.style.overflow = "";
+        }
+        openBtn.addEventListener("click", open);
+        closeBtn.addEventListener("click", close);
+        dlg.addEventListener("close", function () { document.documentElement.style.overflow = ""; });
+        // Clicking the dimmed area outside the card closes it
+        dlg.addEventListener("click", function (e) { if (e.target === dlg) close(); });
+    })();
+    </script>
 
     <script>
     (function () {
