@@ -535,4 +535,4 @@ def export_pdf():
 
 if __name__ == "__main__":
     # Change host to "0.0.0.0" to allow external connections over Tailscale
-    app.run(host="0.0.0.0", port=5097, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
