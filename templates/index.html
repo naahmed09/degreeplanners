@@ -213,6 +213,26 @@
                 </div>
                 {% endif %}
 
+                <!-- Prerequisite Map -->
+                {% if course_map.nodes %}
+                <details class="bg-white rounded-2xl shadow-sm border border-sky-200 overflow-hidden" open>
+                    <summary class="cursor-pointer p-4 flex flex-wrap items-center justify-between gap-2 bg-sky-100/70 hover:bg-sky-100 transition">
+                        <span class="font-extrabold text-sm text-sky-950">Prerequisite Map</span>
+                        <span class="text-[11px] text-sky-900/80 font-medium">Click a course to highlight everything it needs and unlocks</span>
+                    </summary>
+                    <div class="p-4 space-y-3">
+                        <div class="flex flex-wrap items-center justify-between gap-3 text-[11px] font-semibold text-slate-700">
+                            <div id="mapLegend" class="flex flex-wrap items-center gap-x-3 gap-y-1"></div>
+                            <label class="flex items-center gap-1.5 cursor-pointer select-none">
+                                <input type="checkbox" id="mapShowStandalone" class="rounded border-sky-300">
+                                Show courses with no prerequisites or dependents
+                            </label>
+                        </div>
+                        <div id="courseMap" class="overflow-auto max-h-[36rem] rounded-xl border border-sky-100 bg-sky-50/40 p-2"></div>
+                    </div>
+                </details>
+                {% endif %}
+
                 {% if schedule %}
                     {% for sem in schedule %}
                     <div class="bg-white p-5 rounded-2xl shadow-sm border border-sky-200 space-y-3">
@@ -246,5 +266,185 @@
 
         </div>
     </div>
+
+    {% if course_map.nodes %}
+    <script>
+    (function () {
+        const data = {{ course_map|tojson }};
+        const host = document.getElementById("courseMap");
+        const legend = document.getElementById("mapLegend");
+        const standaloneToggle = document.getElementById("mapShowStandalone");
+        if (!host) return;
+
+        const STATUS = {
+            passed:      { label: "Passed",          fill: "#d1fae5", stroke: "#10b981", text: "#064e3b" },
+            failed:      { label: "Retake needed",   fill: "#fef3c7", stroke: "#f59e0b", text: "#78350f" },
+            scheduled:   { label: "Scheduled",       fill: "#e0f2fe", stroke: "#0ea5e9", text: "#0c4a6e" },
+            unscheduled: { label: "Could not schedule", fill: "#ffe4e6", stroke: "#f43f5e", text: "#881337" },
+            none:        { label: "Not taken",       fill: "#ffffff", stroke: "#94a3b8", text: "#1e293b" }
+        };
+        const W = 150, H = 46, GAP_X = 70, GAP_Y = 14, PAD = 12;
+        const NS = "http://www.w3.org/2000/svg";
+
+        const byCode = {};
+        data.nodes.forEach(n => byCode[n.code] = n);
+        const parents = {}, children = {};
+        data.nodes.forEach(n => { parents[n.code] = []; children[n.code] = []; });
+        data.edges.forEach(([from, to]) => { parents[to].push(from); children[from].push(to); });
+
+        function status(n) { return STATUS[n.status] ? n.status : "none"; }
+
+        // Legend: only statuses that actually appear (plus "Not taken" always)
+        const present = new Set(data.nodes.map(status));
+        present.add("none");
+        Object.keys(STATUS).filter(k => present.has(k)).forEach(k => {
+            const item = document.createElement("span");
+            item.className = "inline-flex items-center gap-1";
+            item.innerHTML = '<span style="display:inline-block;width:12px;height:12px;border-radius:3px;border:2px solid ' +
+                STATUS[k].stroke + ';background:' + STATUS[k].fill + '"></span>' + STATUS[k].label;
+            legend.appendChild(item);
+        });
+
+        let selected = null;
+
+        function related(code) {
+            // everything the course needs (ancestors) and everything it unlocks (descendants)
+            const keep = new Set([code]);
+            (function up(c) { parents[c].forEach(p => { if (!keep.has(p)) { keep.add(p); up(p); } }); })(code);
+            (function down(c) { children[c].forEach(d => { if (!keep.has(d)) { keep.add(d); down(d); } }); })(code);
+            return keep;
+        }
+
+        function truncate(text, max) {
+            return text.length > max ? text.slice(0, max - 1) + "…" : text;
+        }
+
+        function el(tag, attrs, parent) {
+            const e = document.createElementNS(NS, tag);
+            Object.keys(attrs || {}).forEach(k => e.setAttribute(k, attrs[k]));
+            if (parent) parent.appendChild(e);
+            return e;
+        }
+
+        function layout(showStandalone) {
+            const connected = data.nodes.filter(n => parents[n.code].length || children[n.code].length);
+            const standalone = data.nodes.filter(n => !parents[n.code].length && !children[n.code].length);
+
+            const maxLevel = connected.reduce((m, n) => Math.max(m, n.level), 0);
+            const columns = [];
+            for (let i = 0; i <= maxLevel; i++) columns.push([]);
+            connected.forEach(n => columns[n.level].push(n.code));
+            columns.forEach(col => col.sort((a, b) => byCode[a].category.localeCompare(byCode[b].category) || a.localeCompare(b)));
+
+            // Reduce edge crossings: order each column by the average position of its neighbours
+            const pos = {};
+            const reindex = () => columns.forEach(col => col.forEach((c, i) => pos[c] = i));
+            const avg = (list) => list.reduce((s, c) => s + pos[c], 0) / list.length;
+            reindex();
+            for (let pass = 0; pass < 4; pass++) {
+                for (let i = 1; i < columns.length; i++) {
+                    columns[i].sort((a, b) => (parents[a].length ? avg(parents[a]) : pos[a]) - (parents[b].length ? avg(parents[b]) : pos[b]));
+                    reindex();
+                }
+                for (let i = columns.length - 2; i >= 0; i--) {
+                    columns[i].sort((a, b) => (children[a].length ? avg(children[a]) : pos[a]) - (children[b].length ? avg(children[b]) : pos[b]));
+                    reindex();
+                }
+            }
+
+            const coords = {};
+            columns.forEach((col, i) => col.forEach((c, r) => {
+                coords[c] = { x: PAD + i * (W + GAP_X), y: PAD + r * (H + GAP_Y) };
+            }));
+
+            const graphWidth = PAD * 2 + columns.length * W + Math.max(0, columns.length - 1) * GAP_X;
+            let height = PAD * 2 + Math.max(1, ...columns.map(c => c.length)) * (H + GAP_Y) - GAP_Y;
+            let width = Math.max(graphWidth, 320);
+
+            if (showStandalone && standalone.length) {
+                const perRow = Math.max(1, Math.floor((width - PAD * 2 + GAP_X) / (W + GAP_X / 2)));
+                const top = height + 8;
+                standalone.sort((a, b) => a.category.localeCompare(b.category) || a.code.localeCompare(b.code));
+                standalone.forEach((n, i) => {
+                    coords[n.code] = {
+                        x: PAD + (i % perRow) * (W + GAP_X / 2),
+                        y: top + 22 + Math.floor(i / perRow) * (H + GAP_Y)
+                    };
+                });
+                height = top + 22 + Math.ceil(standalone.length / perRow) * (H + GAP_Y) + PAD - GAP_Y;
+                return { coords, width, height, label: { y: top + 12, text: "No prerequisites or dependents" } };
+            }
+            return { coords, width, height, label: null };
+        }
+
+        function render() {
+            host.innerHTML = "";
+            const { coords, width, height, label } = layout(standaloneToggle.checked);
+            const keep = selected ? related(selected) : null;
+
+            const svg = el("svg", { width: width, height: height, viewBox: "0 0 " + width + " " + height, role: "img",
+                "aria-label": "Course prerequisite map" }, host);
+            svg.style.display = "block";
+
+            const defs = el("defs", {}, svg);
+            [["arrow", "#94a3b8"], ["arrowOn", "#0369a1"]].forEach(([id, color]) => {
+                const m = el("marker", { id: id, viewBox: "0 0 10 10", refX: "9", refY: "5", markerWidth: "7", markerHeight: "7", orient: "auto-start-reverse" }, defs);
+                el("path", { d: "M 0 0 L 10 5 L 0 10 z", fill: color }, m);
+            });
+            svg.addEventListener("click", () => { selected = null; render(); });
+
+            if (label) {
+                const t = el("text", { x: PAD, y: label.y, "font-size": "11", "font-weight": "700", fill: "#475569" }, svg);
+                t.textContent = label.text;
+            }
+
+            // Edges first so nodes sit on top
+            data.edges.forEach(([from, to]) => {
+                if (!coords[from] || !coords[to]) return;
+                const x1 = coords[from].x + W, y1 = coords[from].y + H / 2;
+                const x2 = coords[to].x,       y2 = coords[to].y + H / 2;
+                const on = keep && keep.has(from) && keep.has(to);
+                const dim = keep && !on;
+                const mid = Math.max(24, (x2 - x1) / 2);
+                el("path", {
+                    d: "M " + x1 + " " + y1 + " C " + (x1 + mid) + " " + y1 + ", " + (x2 - mid) + " " + y2 + ", " + (x2 - 2) + " " + y2,
+                    fill: "none",
+                    stroke: on ? "#0369a1" : "#94a3b8",
+                    "stroke-width": on ? "2" : "1.25",
+                    opacity: dim ? "0.12" : "1",
+                    "marker-end": "url(#" + (on ? "arrowOn" : "arrow") + ")"
+                }, svg);
+            });
+
+            data.nodes.forEach(n => {
+                const c = coords[n.code];
+                if (!c) return;
+                const st = STATUS[status(n)];
+                const dim = keep && !keep.has(n.code);
+                const g = el("g", { transform: "translate(" + c.x + "," + c.y + ")", opacity: dim ? "0.25" : "1" }, svg);
+                g.style.cursor = "pointer";
+                g.addEventListener("click", ev => { ev.stopPropagation(); selected = (selected === n.code) ? null : n.code; render(); });
+
+                const tip = el("title", {}, g);
+                tip.textContent = n.code + " — " + n.name + " (" + n.credits + " cr)\n" + n.category +
+                    (parents[n.code].length ? "\nNeeds: " + parents[n.code].join(", ") : "") +
+                    (n.term ? "\nScheduled: " + n.term : "");
+
+                el("rect", { width: W, height: H, rx: "8", fill: st.fill, stroke: n.code === selected ? "#0c4a6e" : st.stroke,
+                    "stroke-width": n.code === selected ? "3" : "1.5" }, g);
+                const code = el("text", { x: 8, y: 17, "font-size": "11", "font-weight": "800", fill: st.text }, g);
+                code.textContent = truncate(n.code, 20);
+                const name = el("text", { x: 8, y: 30, "font-size": "9.5", fill: st.text }, g);
+                name.textContent = truncate(n.name, 26);
+                const sub = el("text", { x: 8, y: 41, "font-size": "9", fill: st.text, opacity: "0.8" }, g);
+                sub.textContent = n.credits + " cr" + (n.term ? " · " + n.term : "");
+            });
+        }
+
+        standaloneToggle.addEventListener("change", render);
+        render();
+    })();
+    </script>
+    {% endif %}
 </body>
 </html>
