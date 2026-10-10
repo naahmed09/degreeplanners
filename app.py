@@ -210,6 +210,61 @@ def explain_unscheduled(code, details, catalog, remaining, completed, max_credit
 
 
 # --------------------------------------------------------------------------
+# Prerequisite map
+# --------------------------------------------------------------------------
+def build_course_map(catalog, completed, failed, schedule, unscheduled):
+    """
+    Data for the prerequisite map: one node per course (with its column "level",
+    the longest prerequisite chain leading to it) and one edge per prerequisite.
+    Status is "none" until a schedule has been generated.
+    """
+    passed = set(completed)
+    failed_codes = {code for code, _, _ in failed}
+    term_of = {c["code"]: sem["term"] for sem in schedule for c in sem["courses"]}
+    unscheduled_codes = {u["code"] for u in unscheduled}
+
+    levels = {}
+    visiting = set()
+
+    def level(code):
+        if code in levels:
+            return levels[code]
+        if code in visiting:  # circular prereqs: stop descending
+            return 0
+        visiting.add(code)
+        parents = [p for p in catalog[code].get("prereqs", []) if p in catalog]
+        levels[code] = 1 + max((level(p) for p in parents), default=-1)
+        visiting.discard(code)
+        return levels[code]
+
+    nodes, edges = [], []
+    for code, details in catalog.items():
+        if code in passed:
+            status = "passed"
+        elif code in failed_codes:
+            status = "failed"
+        elif code in term_of:
+            status = "scheduled"
+        elif code in unscheduled_codes:
+            status = "unscheduled"
+        else:
+            status = "none"
+        nodes.append({
+            "code": code,
+            "name": details.get("name", code),
+            "credits": details.get("credits", 3),
+            "category": details.get("category", "General Education"),
+            "level": level(code),
+            "status": status,
+            "term": term_of.get(code, ""),
+        })
+        for p in details.get("prereqs", []):
+            if p in catalog:
+                edges.append([p, code])
+    return {"nodes": nodes, "edges": edges}
+
+
+# --------------------------------------------------------------------------
 # Scheduler
 # --------------------------------------------------------------------------
 def optimize_degree_plan(catalog, completed_courses, preferred_terms=None, max_credits=18, start_term="Fall", start_year=2026):
@@ -374,6 +429,10 @@ def index():
 
     upcoming_terms = generate_upcoming_terms(settings["start_term"], settings["start_year"], count=12)
 
+    # Without a generated schedule every course shows as neutral; once one is
+    # generated, passed/failed/scheduled/unscheduled statuses are filled in.
+    course_map = build_course_map(catalog, completed_courses, failed_courses, schedule, unscheduled)
+
     return render_template(
         "index.html",
         degree_programs=degree_programs,
@@ -383,6 +442,7 @@ def index():
         categorized_catalog=categorized_catalog,
         schedule=schedule,
         unscheduled=unscheduled,
+        course_map=course_map,
         user_grades=user_grades,
         preferred_terms=preferred_terms,
         upcoming_terms=upcoming_terms,
@@ -475,4 +535,4 @@ def export_pdf():
 
 if __name__ == "__main__":
     # Change host to "0.0.0.0" to allow external connections over Tailscale
-    app.run(host="0.0.0.0", port=5067, debug=True)
+    app.run(host="0.0.0.0", port=5097, debug=True)
