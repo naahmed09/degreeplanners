@@ -39,6 +39,43 @@
 
                 <form method="POST" action="/" id="planForm" class="space-y-4">
 
+                    <!-- Student & Advisor Information -->
+                    <details class="bg-sky-50/60 rounded-xl border border-sky-200 overflow-hidden" open>
+                        <summary class="font-extrabold text-xs text-sky-950 p-2.5 bg-sky-100/70 hover:bg-sky-100 cursor-pointer">Student &amp; Advisor Information</summary>
+                        <div class="p-3 space-y-2.5">
+                            <div class="grid grid-cols-2 gap-2">
+                                <div><label class="block text-[10px] font-bold text-sky-900 mb-0.5">First Name</label>
+                                    <input type="text" name="student_first" maxlength="80" autocomplete="off" value="{{ student.student_first }}" class="w-full p-2 text-xs bg-sky-50 border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-300 focus:outline-none font-medium"></div>
+                                <div><label class="block text-[10px] font-bold text-sky-900 mb-0.5">Last Name</label>
+                                    <input type="text" name="student_last" maxlength="80" autocomplete="off" value="{{ student.student_last }}" class="w-full p-2 text-xs bg-sky-50 border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-300 focus:outline-none font-medium"></div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div><label class="block text-[10px] font-bold text-sky-900 mb-0.5">Student ID</label>
+                                    <input type="text" name="student_id" maxlength="30" autocomplete="off" value="{{ student.student_id }}" class="w-full p-2 text-xs bg-sky-50 border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-300 focus:outline-none font-medium"></div>
+                                <div><label class="block text-[10px] font-bold text-sky-900 mb-0.5">Catalog Year</label>
+                                    <input type="text" name="catalog_year" maxlength="20" placeholder="e.g. 2025-2026" autocomplete="off" value="{{ student.catalog_year }}" class="w-full p-2 text-xs bg-sky-50 border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-300 focus:outline-none font-medium"></div>
+                            </div>
+                            <div><label class="block text-[10px] font-bold text-sky-900 mb-0.5">Student Email</label>
+                                <input type="email" name="student_email" maxlength="120" autocomplete="off" value="{{ student.student_email }}" class="w-full p-2 text-xs bg-sky-50 border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-300 focus:outline-none font-medium"></div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div><label class="block text-[10px] font-bold text-sky-900 mb-0.5">Advisor</label>
+                                    <input type="text" name="advisor_name" maxlength="120" autocomplete="off" value="{{ student.advisor_name }}" class="w-full p-2 text-xs bg-sky-50 border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-300 focus:outline-none font-medium"></div>
+                                <div><label class="block text-[10px] font-bold text-sky-900 mb-0.5">Advisor Email</label>
+                                    <input type="email" name="advisor_email" maxlength="120" autocomplete="off" value="{{ student.advisor_email }}" class="w-full p-2 text-xs bg-sky-50 border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-300 focus:outline-none font-medium"></div>
+                            </div>
+                            <div><label class="block text-[10px] font-bold text-sky-900 mb-0.5">Minor / Concentration</label>
+                                <input type="text" name="minor" maxlength="120" autocomplete="off" value="{{ student.minor }}" class="w-full p-2 text-xs bg-sky-50 border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-300 focus:outline-none font-medium"></div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-sky-900 mb-0.5">Other Credits Earned (transfer, AP, dual credit)</label>
+                                <input type="number" name="transfer_credits" min="0" max="150" value="{{ student.transfer_credits }}" class="w-full p-2 text-xs bg-sky-50 border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-300 focus:outline-none font-medium">
+                                <p class="text-[10px] text-slate-500 mt-0.5">Counts toward class standing and upper-level eligibility. To remove a specific course from the plan, set its grade below.</p>
+                            </div>
+                            <div><label class="block text-[10px] font-bold text-sky-900 mb-0.5">Notes</label>
+                                <textarea name="notes" rows="4" maxlength="3000" placeholder="Advising notes, holds, approvals, questions..." class="w-full p-2 text-xs bg-sky-50 border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-300 focus:outline-none font-medium">{{ student.notes }}</textarea></div>
+                        </div>
+                    </details>
+
+
                     <!-- Major / Degree Program Selector -->
                     <div>
                         <label class="block text-xs font-extrabold text-sky-950 mb-1.5">Degree Program</label>
@@ -148,30 +185,33 @@
                         </div>
                     </div>
 
-                    <button type="submit" name="action" value="generate"
-                            class="w-full bg-amber-300 hover:bg-amber-400 text-amber-950 font-black py-2.5 text-xs rounded-xl shadow-sm border border-amber-400 transition {% if catalog %}cursor-pointer{% else %}opacity-50 cursor-not-allowed{% endif %}"
-                            {% if not catalog %}disabled{% endif %}>
-                        Generate Degree Schedule
-                    </button>
+                    <div class="space-y-2">
+                        <button type="submit" name="action" value="generate"
+                                class="w-full bg-amber-300 hover:bg-amber-400 text-amber-950 font-black py-2.5 text-xs rounded-xl shadow-sm border border-amber-400 transition {% if catalog %}cursor-pointer{% else %}opacity-50 cursor-not-allowed{% endif %}"
+                                {% if not catalog %}disabled{% endif %}>
+                            Generate Degree Schedule
+                        </button>
+                        {% if schedule %}
+                        <button type="submit" formaction="/export_pdf"
+                                class="w-full bg-sky-200 hover:bg-sky-300 text-sky-950 font-black py-2.5 text-xs rounded-xl shadow-sm border border-sky-300 transition cursor-pointer">
+                            Export Schedule as PDF
+                        </button>
+                        {% endif %}
+                        <button type="submit" formaction="/save_plan"
+                                class="w-full bg-white hover:bg-sky-50 text-sky-950 font-bold py-2 text-xs rounded-xl border border-sky-300 transition cursor-pointer">
+                            Save Plan to File
+                        </button>
+                    </div>
                 </form>
 
-                {% if schedule %}
-                <form method="POST" action="/export_pdf">
-                    <input type="hidden" name="degree" value="{{ selected_degree }}">
-                    <input type="hidden" name="start_term" value="{{ start_term }}">
-                    <input type="hidden" name="start_year" value="{{ start_year }}">
-                    <input type="hidden" name="max_credits" value="{{ max_credits }}">
-                    {% for code, grade in user_grades.items() %}
-                    <input type="hidden" name="grade_{{ code }}" value="{{ grade }}">
-                    {% endfor %}
-                    {% for code, pref in preferred_terms.items() %}
-                    <input type="hidden" name="pref_{{ code }}" value="{{ pref }}">
-                    {% endfor %}
-                    <button type="submit" class="w-full bg-sky-200 hover:bg-sky-300 text-sky-950 font-black py-2.5 text-xs rounded-xl shadow-sm border border-sky-300 transition cursor-pointer">
-                        Export Schedule as PDF
-                    </button>
+                <form method="POST" action="/" enctype="multipart/form-data" class="pt-4 border-t border-sky-100 space-y-1.5">
+                    <label class="block text-[10px] font-bold text-sky-900">Load a saved plan</label>
+                    <div class="flex gap-2 items-center">
+                        <input type="file" name="plan_file" accept=".json,application/json" required
+                               class="min-w-0 flex-1 text-[11px] text-slate-600 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border file:border-sky-300 file:bg-sky-50 file:text-sky-950 file:font-bold file:text-[11px]">
+                        <button type="submit" class="bg-sky-200 hover:bg-sky-300 text-sky-950 font-black px-3 py-1.5 text-xs rounded-lg border border-sky-300 transition cursor-pointer">Load</button>
+                    </div>
                 </form>
-                {% endif %}
             </div>
 
             <!-- Schedule Display Area (7 Cols) -->
@@ -184,6 +224,49 @@
                     </span>
                     {% endif %}
                 </div>
+
+                {% if plan_error %}
+                <div class="bg-rose-50 border border-rose-300 text-rose-950 p-3 rounded-2xl text-xs font-semibold shadow-sm">{{ plan_error }}</div>
+                {% endif %}
+
+                {% if generated or student.full_name or student.advisor_name %}
+                <!-- Student Summary -->
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-sky-200 space-y-3">
+                    <div class="flex flex-wrap justify-between items-start gap-2">
+                        <div>
+                            <div class="text-base font-black text-sky-950">{{ student.full_name or "Student name not entered" }}</div>
+                            <div class="text-[11px] text-slate-600 font-medium">
+                                {% if student.student_id %}ID {{ student.student_id }} · {% endif %}{{ degree_name }}{% if student.minor %} · Minor: {{ student.minor }}{% endif %}{% if student.catalog_year %} · Catalog {{ student.catalog_year }}{% endif %}
+                            </div>
+                            {% if student.advisor_name %}
+                            <div class="text-[11px] text-slate-600 font-medium">Advisor: {{ student.advisor_name }}{% if student.advisor_email %} ({{ student.advisor_email }}){% endif %}</div>
+                            {% endif %}
+                        </div>
+                        <span class="text-[11px] bg-amber-200/80 text-amber-950 border border-amber-300 px-2.5 py-0.5 rounded-full font-black">{{ summary.classification }}</span>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-center">
+                        <div class="bg-sky-50 border border-sky-100 rounded-xl p-2">
+                            <div class="text-lg font-black text-sky-950">{{ summary.credits_earned }}</div>
+                            <div class="text-[10px] font-bold text-slate-600">Credits earned</div>
+                        </div>
+                        <div class="bg-sky-50 border border-sky-100 rounded-xl p-2">
+                            <div class="text-lg font-black text-sky-950">{{ summary.credits_remaining if summary.credits_remaining is not none else "—" }}</div>
+                            <div class="text-[10px] font-bold text-slate-600">Credits remaining</div>
+                        </div>
+                        <div class="bg-sky-50 border border-sky-100 rounded-xl p-2">
+                            <div class="text-lg font-black text-sky-950">{{ summary.semesters if summary.semesters is not none else "—" }}</div>
+                            <div class="text-[10px] font-bold text-slate-600">Semesters left</div>
+                        </div>
+                        <div class="bg-sky-50 border border-sky-100 rounded-xl p-2">
+                            <div class="text-xs font-black text-sky-950 leading-tight min-h-[1.75rem] flex items-center justify-center">{{ summary.projected_graduation or "—" }}</div>
+                            <div class="text-[10px] font-bold text-slate-600">Projected completion</div>
+                        </div>
+                    </div>
+                    {% if student.notes %}
+                    <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-[11px] text-amber-950 whitespace-pre-line"><strong>Notes:</strong> {{ student.notes }}</div>
+                    {% endif %}
+                </div>
+                {% endif %}
 
                 <!-- Warning Alert for Repeating Failed Courses -->
                 {% if failed_courses %}
