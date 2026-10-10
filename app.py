@@ -1,13 +1,15 @@
+import datetime
 import io
 import json
 import os
 import re
+import unicodedata
 from xml.sax.saxutils import escape
 
-from flask import Flask, render_template, request, send_file
+from flask import Flask, Response, render_template, request, send_file
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.platypus import KeepTogether, SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 
 app = Flask(__name__)
@@ -37,6 +39,15 @@ LEVEL_MIN_CREDITS = {3: 30, 4: 60}
 
 # Categories with no course number that are known to be upper-level.
 CATEGORY_MIN_CREDITS = {"Chemistry Electives": 60}
+
+# Free-text student fields and their maximum lengths.
+STUDENT_FIELDS = {
+    "student_first": 80, "student_last": 80, "student_id": 30, "student_email": 120,
+    "advisor_name": 120, "advisor_email": 120, "catalog_year": 20, "minor": 120,
+    "notes": 3000,
+}
+PLAN_FILE_FIELDS = {"degree", "start_term", "start_year", "max_credits", "transfer_credits"} | set(STUDENT_FIELDS)
+MAX_PLAN_FILE_BYTES = 1_000_000
 
 
 # --------------------------------------------------------------------------
@@ -267,7 +278,7 @@ def build_course_map(catalog, completed, failed, schedule, unscheduled):
 # --------------------------------------------------------------------------
 # Scheduler
 # --------------------------------------------------------------------------
-def optimize_degree_plan(catalog, completed_courses, preferred_terms=None, max_credits=18, start_term="Fall", start_year=2026):
+def optimize_degree_plan(catalog, completed_courses, preferred_terms=None, max_credits=18, start_term="Fall", start_year=2026, extra_credits=0):
     """
     Returns (schedule, unscheduled).
 
@@ -276,6 +287,7 @@ def optimize_degree_plan(catalog, completed_courses, preferred_terms=None, max_c
     free-standing ones (gen eds). Optional per-course JSON fields:
       "offered":     ["Fall"] or ["Spring"]  - seasons the course is offered
       "min_credits": 60                      - credits needed before taking it
+    extra_credits (transfer, AP, dual credit) count toward "min_credits" eligibility.
     """
     if preferred_terms is None:
         preferred_terms = {}
@@ -283,7 +295,7 @@ def optimize_degree_plan(catalog, completed_courses, preferred_terms=None, max_c
     completed = set(completed_courses)
     remaining = {code: data for code, data in catalog.items() if code not in completed}
     depth = chain_lengths(catalog)
-    credits_done = sum(catalog[c].get("credits", 3) for c in completed if c in catalog)
+    credits_done = sum(catalog[c].get("credits", 3) for c in completed if c in catalog) + extra_credits
 
     schedule = []
     current_term = start_term
@@ -398,35 +410,122 @@ def read_grades(form, catalog):
 
 
 # --------------------------------------------------------------------------
+# Student information, summary and saved plans
+# --------------------------------------------------------------------------
+def read_student(form):
+    """Free-text student/advisor fields (trimmed and length-limited) plus other earned credits."""
+    student = {key: (form.get(key, "") or "").strip()[:limit] for key, limit in STUDENT_FIELDS.items()}
+    student["transfer_credits"] = to_int(form.get("transfer_credits"), 0, 0, 150)
+    student["full_name"] = " ".join(p for p in (student["student_first"], student["student_last"]) if p)
+    return student
+
+
+def classification(credits):
+    if credits >= 90:
+        return "Senior"
+    if credits >= 60:
+        return "Junior"
+    if credits >= 30:
+        return "Sophomore"
+    return "Freshman"
+
+
+def build_summary(student, catalog, passed, schedule, unscheduled, generated):
+    """Numbers shown in the summary card and the PDF header."""
+    earned = sum(catalog[c].get("credits", 3) for c in passed if c in catalog) + student["transfer_credits"]
+    summary = {
+        "credits_earned": earned,
+        "classification": classification(earned),
+        "credits_remaining": None,
+        "semesters": None,
+        "projected_graduation": "",
+    }
+    if generated:
+        summary["credits_remaining"] = sum(sem["credits"] for sem in schedule) + sum(u["credits"] for u in unscheduled)
+        summary["semesters"] = len(schedule)
+        if unscheduled:
+            summary["projected_graduation"] = "Not reachable until unscheduled courses are fixed"
+        elif schedule:
+            summary["projected_graduation"] = schedule[-1]["term"]
+        else:
+            summary["projected_graduation"] = "All listed courses are complete"
+    return summary
+
+
+def file_name_part(text, fallback):
+    """Safe piece of a download filename; accents are folded (María -> Maria)."""
+    ascii_text = unicodedata.normalize("NFKD", text or "").encode("ascii", "ignore").decode()
+    cleaned = re.sub(r"[^A-Za-z0-9_-]+", "", ascii_text.replace(" ", "_"))
+    return cleaned[:40] or fallback
+
+
+def parse_plan_file(upload):
+    """Reads a saved plan (.json). Returns a dict of form fields, or None if it is not a valid plan."""
+    raw = upload.read(MAX_PLAN_FILE_BYTES + 1)
+    if len(raw) > MAX_PLAN_FILE_BYTES:
+        return None
+    try:
+        data = json.loads(raw.decode("utf-8"))
+    except (UnicodeDecodeError, ValueError):
+        return None
+    fields = data.get("fields") if isinstance(data, dict) else None
+    if not isinstance(fields, dict):
+        return None
+    clean = {}
+    for key, value in fields.items():
+        if not isinstance(key, str) or isinstance(value, (dict, list)):
+            continue
+        if key in PLAN_FILE_FIELDS or key.startswith(("grade_", "pref_")):
+            clean[key] = str(value)
+    return clean or None
+
+
+# --------------------------------------------------------------------------
 # Routes
 # --------------------------------------------------------------------------
 @app.route("/", methods=["GET", "POST"])
 def index():
     degree_programs = discover_degree_programs()
-    selected_degree = request.form.get("degree", next(iter(degree_programs.keys()), ""))
 
+    # A plan can be loaded from a file saved earlier; it replaces the form values.
+    form, plan_error, loaded_plan = request.form, "", False
+    upload = request.files.get("plan_file")
+    if request.method == "POST" and upload and upload.filename:
+        fields = parse_plan_file(upload)
+        if fields is None:
+            plan_error = "That file is not a saved degree plan, so nothing was loaded."
+        else:
+            form, loaded_plan = fields, True
+
+    selected_degree = form.get("degree", next(iter(degree_programs.keys()), ""))
     catalog, selected_degree = load_combined_course_catalog(selected_degree)
     categorized_catalog = group_catalog_by_category(catalog)
     degree_name = degree_programs.get(selected_degree, {}).get("name", "No degree selected")
 
     settings = {"max_credits": 18, "start_term": "Fall", "start_year": 2026}
+    student = read_student({})
     schedule, unscheduled = [], []
     user_grades, preferred_terms = {}, {}
-    completed_courses, failed_courses = [], []
+    passed, completed_courses, failed_courses = [], [], []
+    generated = False
 
-    if request.method == "POST":
-        settings = read_settings(request.form)
-        user_grades, preferred_terms, passed, failed = read_grades(request.form, catalog)
+    if request.method == "POST" and not plan_error:
+        settings = read_settings(form)
+        student = read_student(form)
+        user_grades, preferred_terms, passed, failed = read_grades(form, catalog)
 
         # Switching the degree dropdown re-submits the form without the
         # "generate" action, so it only reloads the course list.
-        if request.form.get("action") == "generate" and catalog:
+        generated = (form.get("action") == "generate" or loaded_plan) and bool(catalog)
+        if generated:
             completed_courses, failed_courses = passed, failed
             schedule, unscheduled = optimize_degree_plan(
                 catalog, completed_courses, preferred_terms,
                 settings["max_credits"], settings["start_term"], settings["start_year"],
+                student["transfer_credits"],
             )
 
+    summary = build_summary(student, catalog, passed, schedule, unscheduled, generated)
     upcoming_terms = generate_upcoming_terms(settings["start_term"], settings["start_year"], count=12)
 
     # Without a generated schedule every course shows as neutral; once one is
@@ -451,7 +550,25 @@ def index():
         max_credits=settings["max_credits"],
         start_term=settings["start_term"],
         start_year=settings["start_year"],
+        student=student,
+        summary=summary,
+        generated=generated,
+        plan_error=plan_error,
         get_min_passing_score=get_min_passing_score,
+    )
+
+
+@app.route("/save_plan", methods=["POST"])
+def save_plan():
+    """Downloads every form field as a .json file that can be loaded back later."""
+    fields = {k: v for k, v in request.form.items() if k in PLAN_FILE_FIELDS or k.startswith(("grade_", "pref_"))}
+    student = read_student(request.form)
+    payload = {"app": "sau-degree-planner", "version": 1, "saved": datetime.date.today().isoformat(), "fields": fields}
+    name = f"plan_{file_name_part(student['student_last'], 'student')}_{file_name_part(student['student_first'], 'plan')}.json"
+    return Response(
+        json.dumps(payload, indent=2),
+        mimetype="application/json",
+        headers={"Content-Disposition": f'attachment; filename="{name}"'},
     )
 
 
@@ -462,32 +579,71 @@ def export_pdf():
     degree_name = degree_programs.get(selected_degree, {}).get("name", "Degree Plan")
 
     settings = read_settings(request.form)
+    student = read_student(request.form)
     _, preferred_terms, completed_courses, failed_courses = read_grades(request.form, catalog)
     schedule, unscheduled = optimize_degree_plan(
         catalog, completed_courses, preferred_terms,
         settings["max_credits"], settings["start_term"], settings["start_year"],
+        student["transfer_credits"],
     )
+    summary = build_summary(student, catalog, completed_courses, schedule, unscheduled, True)
+
+    today = datetime.date.today()
+    prepared = f"{today:%B} {today.day}, {today.year}"
 
     buffer = io.BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=36, leftMargin=36, topMargin=36, bottomMargin=36)
+    doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=36, leftMargin=36, topMargin=36, bottomMargin=44)
     styles = getSampleStyleSheet()
     cell_style = ParagraphStyle("Cell", parent=styles["Normal"], fontSize=9, leading=11)
+    label_style = ParagraphStyle("Label", parent=cell_style, fontName="Helvetica-Bold", textColor=colors.HexColor("#0f2942"))
+
+    def field(text):
+        return Paragraph(escape(text) if text else "&mdash;", cell_style)
 
     story = []
 
     title_style = ParagraphStyle("TitleStyle", parent=styles["Heading1"], fontSize=18, leading=22, textColor=colors.HexColor("#0f2942"))
-    story.append(Paragraph(f"Optimized Degree Schedule: {escape(degree_name)}", title_style))
-    story.append(Spacer(1, 12))
+    story.append(Paragraph(f"Degree Plan: {escape(degree_name)}", title_style))
+    story.append(Spacer(1, 8))
+
+    info = Table([
+        [Paragraph("Student", label_style), field(student["full_name"]), Paragraph("Student ID", label_style), field(student["student_id"])],
+        [Paragraph("Email", label_style), field(student["student_email"]), Paragraph("Class standing", label_style), field(f"{summary['classification']} ({summary['credits_earned']} credits earned)")],
+        [Paragraph("Advisor", label_style), field(student["advisor_name"]), Paragraph("Advisor email", label_style), field(student["advisor_email"])],
+        [Paragraph("Major", label_style), field(degree_name), Paragraph("Catalog year", label_style), field(student["catalog_year"])],
+        [Paragraph("Minor / concentration", label_style), field(student["minor"]), Paragraph("Prepared", label_style), field(prepared)],
+    ], colWidths=[100, 160, 90, 170])
+    info.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#f0f9ff")),
+        ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#bae6fd")),
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+    ]))
+    story.append(info)
+    story.append(Spacer(1, 10))
 
     total_credits = sum(sem["credits"] for sem in schedule)
     meta_text = (
         f"<b>Start Term:</b> {settings['start_term']} {settings['start_year']} | "
         f"<b>Max Credits / Term:</b> {settings['max_credits']} | "
         f"<b>Remaining Credits Scheduled:</b> {total_credits} | "
-        "<b>SAU Rules:</b> Major/STEM C or higher, Gen Ed D or higher"
+        f"<b>Projected Completion:</b> {escape(summary['projected_graduation'])}"
     )
     story.append(Paragraph(meta_text, styles["Normal"]))
-    story.append(Spacer(1, 16))
+    story.append(Spacer(1, 4))
+    story.append(Paragraph("<b>SAU Rules:</b> Major/STEM C or higher, Gen Ed D or higher", styles["Normal"]))
+    story.append(Spacer(1, 12))
+
+    if student["notes"]:
+        story.append(Paragraph("<b>Notes</b>", styles["Normal"]))
+        story.append(Spacer(1, 3))
+        notes_box = Table([[Paragraph(escape(student["notes"]).replace("\n", "<br/>"), cell_style)]], colWidths=[520])
+        notes_box.setStyle(TableStyle([
+            ("BOX", (0, 0), (-1, -1), 0.5, colors.HexColor("#fcd34d")),
+            ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#fffbeb")),
+            ("TOPPADDING", (0, 0), (-1, -1), 6), ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+        ]))
+        story.append(notes_box)
+        story.append(Spacer(1, 12))
 
     if failed_courses:
         story.append(Paragraph("<b>Minimum grade not met (must retake):</b>", styles["Normal"]))
@@ -502,8 +658,7 @@ def export_pdf():
         story.append(Spacer(1, 14))
 
     for sem in schedule:
-        story.append(Paragraph(f"<b>{sem['term']}</b> ({sem['credits']} Total Credits)", styles["Heading2"]))
-        story.append(Spacer(1, 6))
+        block = [Paragraph(f"<b>{sem['term']}</b> ({sem['credits']} Total Credits)", styles["Heading2"]), Spacer(1, 6)]
 
         table_data = [["Course Code", "Course Title", "Credits"]]
         for c in sem["courses"]:
@@ -519,20 +674,40 @@ def export_pdf():
             ("ALIGN", (2, 0), (2, -1), "CENTER"),
             ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
         ]))
-        story.append(t)
-        story.append(Spacer(1, 14))
+        block.append(t)
+        block.append(Spacer(1, 14))
+        story.append(KeepTogether(block))
 
-    doc.build(story)
+    # Signature lines for the advising meeting
+    sign = Table(
+        [["", "", "", ""], ["Student signature", "", "Date", ""], ["", "", "", ""], ["Advisor signature", "", "Date", ""]],
+        colWidths=[110, 230, 40, 120], rowHeights=[16, 14, 16, 14],
+    )
+    sign.setStyle(TableStyle([
+        ("FONTSIZE", (0, 0), (-1, -1), 8),
+        ("TEXTCOLOR", (0, 0), (-1, -1), colors.HexColor("#475569")),
+        ("LINEABOVE", (1, 1), (1, 1), 0.5, colors.black), ("LINEABOVE", (3, 1), (3, 1), 0.5, colors.black),
+        ("LINEABOVE", (1, 3), (1, 3), 0.5, colors.black), ("LINEABOVE", (3, 3), (3, 3), 0.5, colors.black),
+    ]))
+    story.append(KeepTogether([Spacer(1, 16), sign]))
+
+    footer_label = f"{student['full_name'] + ' - ' if student['full_name'] else ''}{degree_name}"
+
+    def footer(canvas, document):
+        canvas.saveState()
+        canvas.setFont("Helvetica", 8)
+        canvas.setFillColor(colors.HexColor("#64748b"))
+        canvas.drawString(36, 24, footer_label[:90])
+        canvas.drawRightString(letter[0] - 36, 24, f"Page {document.page}")
+        canvas.restoreState()
+
+    doc.build(story, onFirstPage=footer, onLaterPages=footer)
     buffer.seek(0)
 
-    return send_file(
-        buffer,
-        as_attachment=True,
-        download_name=f"{selected_degree}_Plan_{settings['start_term']}_{settings['start_year']}.pdf",
-        mimetype="application/pdf",
-    )
+    name = f"{file_name_part(student['student_last'], selected_degree)}_Plan_{settings['start_term']}_{settings['start_year']}.pdf"
+    return send_file(buffer, as_attachment=True, download_name=name, mimetype="application/pdf")
 
 
 if __name__ == "__main__":
     # Change host to "0.0.0.0" to allow external connections over Tailscale
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5167, debug=True)
