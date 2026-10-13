@@ -1,0 +1,30 @@
+{% extends "legal_base.html" %}
+{% block title %}Accessibility Statement{% endblock %}
+{% block content %}
+<h1>Accessibility Statement</h1>
+<p class="updated">Last updated {{ operator.updated }}</p>
+
+<div class="summary">
+    <p><strong>In short:</strong> we want everyone to be able to use the planner, and we work toward the Web Content Accessibility Guidelines (WCAG) 2.2, Level AA. If something does not work for you, tell us and we will help.</p>
+</div>
+
+<h2>What we have done</h2>
+<ul>
+    <li>Every form field has a visible label, and the course controls name the course they belong to for screen readers.</li>
+    <li>The whole planner works with a keyboard. Focus is always visible, and there is a skip link to the main content.</li>
+    <li>Choosing a degree does not reload the page until you press <em>Load courses</em>, so arrow keys never trigger changes you did not ask for.</li>
+    <li>Text and controls meet the WCAG AA contrast ratios in both light and dark mode.</li>
+    <li>The page reflows for small screens and zoom, and the light or dark mode fade is skipped if your device asks for reduced motion.</li>
+    <li>Status is never shown by color alone: the prerequisite map names each course's status and the schedule uses text labels.</li>
+</ul>
+
+<h2>Known limitations</h2>
+<ul>
+    <li>The prerequisite map is a visual aid. You can move between courses with Tab and press Enter to highlight them, and the same prerequisites are listed in text on each course card and in the schedule.</li>
+    <li>The PDF export is meant for printing and may not be fully tagged for screen readers. The same schedule is available as text on the page.</li>
+    <li>We have checked the planner with automated tests and keyboard testing. It has not had a formal third-party accessibility audit.</li>
+</ul>
+
+<h2>Tell us about a problem</h2>
+<p>If you find something hard to use, or need the schedule in another format, contact {% if operator.contact %}<a href="mailto:{{ operator.contact }}">{{ operator.contact }}</a>{% else %}[contact email not set]{% endif %}. Please say what you were trying to do and what happened, and which browser or assistive technology you use. The planner is open source, so you can also report a problem or suggest a fix in {% if operator.source %}<a href="{{ operator.source }}" target="_blank" rel="noopener">the project's source code (opens in a new tab)</a>{% else %}the project's public source code{% endif %}. We will do our best to fix it or give you another way to get what you need.</p>
+{% endblock %}
