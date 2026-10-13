@@ -1,0 +1,39 @@
+{% extends "legal_base.html" %}
+{% block title %}Cookies and Browser Storage{% endblock %}
+{% block content %}
+<h1>Cookies and Browser Storage</h1>
+<p class="updated">Last updated {{ operator.updated }}</p>
+
+<div class="summary">
+    <p><strong>In short:</strong> the planner sets no cookies. It uses your browser's own storage for two things you ask for: remembering light or dark mode, and, only if you tick the box, remembering your work. Nothing is used for tracking or advertising.</p>
+</div>
+
+<h2>Cookies</h2>
+<p>None. The planner does not set or read any cookies, and it uses no analytics or advertising tools that would.</p>
+
+<h2>Browser storage we use</h2>
+<div class="tablewrap">
+<table>
+    <thead><tr><th scope="col">Name</th><th scope="col">What it is for</th><th scope="col">When it is set</th><th scope="col">How long it lasts</th></tr></thead>
+    <tbody>
+        <tr><th scope="row"><code>theme</code> (local storage)</th><td>Remembers light or dark mode.</td><td>When you press the Dark mode / Light mode button.</td><td>Until you clear site data.</td></tr>
+        <tr><th scope="row"><code>sauPlannerTerms</code> (local storage)</th><td>Remembers that you agreed to the Terms, so the "Before you start" notice does not appear every visit.</td><td>When you press <em>I agree and continue</em>.</td><td>Until you press Start Over or clear site data.</td></tr>
+        <tr><th scope="row"><code>sauPlannerConsent</code> (local storage)</th><td>Remembers that you ticked <em>Remember my work on this device</em>.</td><td>When you tick that box.</td><td>Until you untick it, press Start Over, or clear site data.</td></tr>
+        <tr><th scope="row"><code>sauPlannerAutosave.v1</code> (local storage)</th><td>Your entries, so the planner can restore them next visit.</td><td>Only while <em>Remember my work on this device</em> is ticked.</td><td>Until you untick it, press Start Over, or clear site data.</td></tr>
+        <tr><th scope="row"><code>sauPlannerScroll</code>, <code>sauPlannerRestored</code> (session storage)</th><td>Keeps your place on the page after a button reloads it, and shows a one-time "Welcome back" message.</td><td>When you use a button that reloads the page.</td><td>Removed straight away or when you close the tab.</td></tr>
+    </tbody>
+</table>
+</div>
+<p>This storage stays in your browser. It is never sent to the server by the browser on its own; your entries are sent only when you press a button, as described in the <a href="/privacy">Privacy Policy</a>.</p>
+
+<p>The planner is open source, so you can confirm this list by reading {% if operator.source %}<a href="{{ operator.source }}" target="_blank" rel="noopener">the project's source code (opens in a new tab)</a>{% else %}the project's public source code{% endif %}.</p>
+
+<h2>Consent</h2>
+<p>Remembering your light or dark mode is a setting you asked for by pressing the button. Saving your entries is off by default and happens only after you tick <em>Remember my work on this device</em>. You can untick it at any time.</p>
+
+<h2>How to remove it</h2>
+<ul>
+    <li>Press <em>Start Over</em> in the planner. This deletes the saved entries and your consent choice.</li>
+    <li>Or clear this site's data in your browser settings.</li>
+</ul>
+{% endblock %}
