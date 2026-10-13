@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SAU Degree Planner</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='SAU_Logo_NoText_RGB-ai-2.png') }}">
     <!-- THEME START (light/dark colors: edit the variables below, not the Tailwind classes) -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="{{ url_for('static', filename='vendor/tailwind.js') }}"></script>
     <script>
     // Every sky/amber/slate/rose/white utility reads its color from a CSS variable,
     // so switching the "dark" class on <html> re-colors the whole page.
@@ -428,8 +429,45 @@
         }
     </style>
     <!-- THEME END -->
+    <style>
+        /* Accessibility: visible focus, readable placeholders, clear form-control borders, comfortable targets. Colors reuse the theme variables so they fade with the rest. */
+        :focus-visible { outline: 3px solid rgb(var(--sky-700)) !important; outline-offset: 2px; }
+        input:not([type="checkbox"]):not([type="file"]):not([type="hidden"]), select, textarea { border-color: rgb(var(--slate-500)) !important; }
+        ::placeholder { color: rgb(var(--slate-600)) !important; opacity: 1; }
+        input[type="checkbox"] { width: 1.25rem; height: 1.25rem; flex-shrink: 0; cursor: pointer; }
+        button, select, summary, input:not([type="checkbox"]):not([type="hidden"]):not([type="file"]) { min-height: 24px; }
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+        .skip-link { position: absolute; left: -9999px; top: 0.5rem; z-index: 60; background: rgb(var(--white)); color: rgb(var(--sky-900)); padding: 0.6rem 1rem; border-radius: 0.5rem; border: 2px solid rgb(var(--sky-700)); font-weight: 800; }
+        .skip-link:focus { left: 0.5rem; }
+        #courseMap g[role="button"]:focus-visible rect { stroke: rgb(var(--sky-700)) !important; stroke-width: 3px; }
+        #courseMap g[role="button"]:focus { outline: none; }
+        footer a { text-decoration: underline; text-underline-offset: 2px; }
+    </style>
 </head>
 <body class="bg-sky-100/70 text-slate-800 min-h-screen p-6 md:p-8">
+<script>
+// Restore the last session saved in this browser (before anything is drawn, so there is no flash of an empty form).
+(function () {
+    try {
+        if ({{ 'true' if posted else 'false' }} || location.search) return;
+        if (localStorage.getItem("sauPlannerConsent") !== "1") return;
+        var raw = localStorage.getItem("sauPlannerAutosave.v1");
+        if (!raw) return;
+        var saved = JSON.parse(raw);
+        if (!saved || !saved.fields || !saved.fields.length) return;
+        sessionStorage.setItem("sauPlannerRestored", "1");
+        document.documentElement.style.visibility = "hidden";
+        var f = document.createElement("form");
+        f.method = "POST"; f.action = "/"; f.style.display = "none";
+        saved.fields.concat(saved.generate ? [["action", "generate"]] : []).forEach(function (kv) {
+            var i = document.createElement("input"); i.type = "hidden"; i.name = kv[0]; i.value = kv[1]; f.appendChild(i);
+        });
+        document.body.appendChild(f);
+        window.addEventListener("pageshow", function () { document.documentElement.style.visibility = ""; });
+        f.submit();
+    } catch (e) { document.documentElement.style.visibility = ""; }
+})();
+</script>
 {% macro mission_content() %}
         <div class="space-y-4">
             <span class="inline-block text-[10px] bg-amber-200/80 text-amber-950 px-2 py-0.5 rounded-full font-black border border-amber-300 tracking-wide uppercase">Our Mission</span>
@@ -465,10 +503,11 @@
                     <p class="text-[11px] leading-relaxed text-slate-600">One semester-by-semester plan, a prerequisite map, and a plain-language reason for anything that can't be placed.</p>
                 </div>
             </div>
-            <p class="text-[10px] text-slate-500">A planning aid, not an official record. Review every plan with your advisor and the current catalog before registering.</p>
+            <p class="text-[10px] text-slate-600">A planning aid, not an official record. Review every plan with your advisor and the current catalog before registering.</p>
         </div>
 {% endmacro %}
 
+    <a href="#main" class="skip-link">Skip to main content</a>
     <div class="max-w-7xl mx-auto space-y-6">
 
         <!-- App Header Banner (SAU Blue & Mulerider Gold Accents with Logo) -->
@@ -496,7 +535,7 @@
             </button>
 
             <!-- Light / dark mode toggle -->
-            <button id="themeToggle" type="button" aria-pressed="false" aria-label="Switch to dark mode"
+            <button id="themeToggle" type="button"
                     class="shrink-0 inline-flex items-center gap-2 bg-white/70 hover:bg-white text-sky-950 text-xs font-bold px-3 py-2 rounded-xl border border-sky-300 shadow-sm transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-sky-300">
                 <svg id="themeIconMoon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
                 <svg id="themeIconSun" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
@@ -505,10 +544,11 @@
             </div>
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <main id="main" tabindex="-1" class="grid grid-cols-1 lg:grid-cols-12 gap-8 focus:outline-none">
 
             <!-- Sidebar Controls (5 Cols) -->
             <div class="lg:col-span-5 bg-white p-6 rounded-2xl shadow-sm border border-sky-200 h-fit space-y-5">
+                <h2 class="sr-only">Plan settings</h2>
 
                 {% if not catalog %}
                 <div class="bg-amber-50 border border-amber-300 text-amber-900 p-3 rounded-xl text-xs">
@@ -522,61 +562,61 @@
                     <details class="bg-sky-50/60 rounded-xl border border-sky-200 overflow-hidden" open>
                         <summary class="font-extrabold text-xs text-sky-950 p-2.5 bg-sky-100/70 hover:bg-sky-100 cursor-pointer">Student &amp; Advisor Information</summary>
                         <div class="p-3 space-y-2.5">
+                            <p id="studentNotice" class="text-[11px] text-slate-700 font-medium">Everything in this section is optional. It only appears on your printed PDF and saved plan file. Please do not enter health, financial or other sensitive information.</p>
                             <div class="grid grid-cols-2 gap-2">
-                                <div><label class="block text-[10px] font-bold text-sky-900 mb-0.5">First Name</label>
-                                    <input type="text" name="student_first" maxlength="80" autocomplete="off" value="{{ student.student_first }}" class="w-full p-2 text-xs bg-sky-50 border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-300 focus:outline-none font-medium"></div>
-                                <div><label class="block text-[10px] font-bold text-sky-900 mb-0.5">Last Name</label>
-                                    <input type="text" name="student_last" maxlength="80" autocomplete="off" value="{{ student.student_last }}" class="w-full p-2 text-xs bg-sky-50 border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-300 focus:outline-none font-medium"></div>
+                                <div><label class="block text-[10px] font-bold text-sky-900 mb-0.5" for="f_student_first">First Name (optional)</label>
+                                    <input id="f_student_first" type="text" name="student_first" maxlength="80" autocomplete="given-name" value="{{ student.student_first }}" class="w-full p-2 text-xs bg-sky-50 border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-300 focus:outline-none font-medium"></div>
+                                <div><label class="block text-[10px] font-bold text-sky-900 mb-0.5" for="f_student_last">Last Name (optional)</label>
+                                    <input id="f_student_last" type="text" name="student_last" maxlength="80" autocomplete="family-name" value="{{ student.student_last }}" class="w-full p-2 text-xs bg-sky-50 border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-300 focus:outline-none font-medium"></div>
                             </div>
                             <div class="grid grid-cols-2 gap-2">
-                                <div><label class="block text-[10px] font-bold text-sky-900 mb-0.5">Student ID</label>
-                                    <input type="text" name="student_id" maxlength="30" autocomplete="off" value="{{ student.student_id }}" class="w-full p-2 text-xs bg-sky-50 border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-300 focus:outline-none font-medium"></div>
-                                <div><label class="block text-[10px] font-bold text-sky-900 mb-0.5">Catalog Year</label>
-                                    <input type="text" name="catalog_year" maxlength="20" placeholder="e.g. 2025-2026" autocomplete="off" value="{{ student.catalog_year }}" class="w-full p-2 text-xs bg-sky-50 border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-300 focus:outline-none font-medium"></div>
+                                <div><label class="block text-[10px] font-bold text-sky-900 mb-0.5" for="f_student_id">Student ID (optional)</label>
+                                    <input id="f_student_id" type="text" name="student_id" maxlength="30" autocomplete="off" value="{{ student.student_id }}" class="w-full p-2 text-xs bg-sky-50 border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-300 focus:outline-none font-medium"></div>
+                                <div><label class="block text-[10px] font-bold text-sky-900 mb-0.5" for="f_catalog_year">Catalog Year (optional)</label>
+                                    <input id="f_catalog_year" type="text" name="catalog_year" maxlength="20" placeholder="e.g. 2025-2026" autocomplete="off" value="{{ student.catalog_year }}" class="w-full p-2 text-xs bg-sky-50 border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-300 focus:outline-none font-medium"></div>
                             </div>
-                            <div><label class="block text-[10px] font-bold text-sky-900 mb-0.5">Student Email</label>
-                                <input type="email" name="student_email" maxlength="120" autocomplete="off" value="{{ student.student_email }}" class="w-full p-2 text-xs bg-sky-50 border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-300 focus:outline-none font-medium"></div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <div><label class="block text-[10px] font-bold text-sky-900 mb-0.5">Advisor</label>
-                                    <input type="text" name="advisor_name" maxlength="120" autocomplete="off" value="{{ student.advisor_name }}" class="w-full p-2 text-xs bg-sky-50 border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-300 focus:outline-none font-medium"></div>
-                                <div><label class="block text-[10px] font-bold text-sky-900 mb-0.5">Advisor Email</label>
-                                    <input type="email" name="advisor_email" maxlength="120" autocomplete="off" value="{{ student.advisor_email }}" class="w-full p-2 text-xs bg-sky-50 border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-300 focus:outline-none font-medium"></div>
-                            </div>
-                            <div><label class="block text-[10px] font-bold text-sky-900 mb-0.5">Minor / Concentration</label>
-                                <input type="text" name="minor" maxlength="120" autocomplete="off" value="{{ student.minor }}" class="w-full p-2 text-xs bg-sky-50 border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-300 focus:outline-none font-medium"></div>
+                            <div><label class="block text-[10px] font-bold text-sky-900 mb-0.5" for="f_advisor_name">Advisor (optional)</label>
+                                <input id="f_advisor_name" type="text" name="advisor_name" maxlength="120" autocomplete="off" value="{{ student.advisor_name }}" class="w-full p-2 text-xs bg-sky-50 border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-300 focus:outline-none font-medium"></div>
+                            <div><label class="block text-[10px] font-bold text-sky-900 mb-0.5" for="f_minor">Minor / Concentration (optional)</label>
+                                <input id="f_minor" type="text" name="minor" maxlength="120" autocomplete="off" value="{{ student.minor }}" class="w-full p-2 text-xs bg-sky-50 border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-300 focus:outline-none font-medium"></div>
                             <div>
-                                <label class="block text-[10px] font-bold text-sky-900 mb-0.5">Other Credits Earned (transfer, AP, dual credit)</label>
-                                <input type="number" name="transfer_credits" min="0" max="150" value="{{ student.transfer_credits }}" class="w-full p-2 text-xs bg-sky-50 border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-300 focus:outline-none font-medium">
-                                <p class="text-[10px] text-slate-500 mt-0.5">Counts toward class standing and upper-level eligibility. To remove a specific course from the plan, set its grade below.</p>
+                                <label class="block text-[10px] font-bold text-sky-900 mb-0.5" for="f_transfer_credits">Other Credits Earned (transfer, AP, dual credit)</label>
+                                <input id="f_transfer_credits" type="number" name="transfer_credits" min="0" max="150" value="{{ student.transfer_credits }}" class="w-full p-2 text-xs bg-sky-50 border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-300 focus:outline-none font-medium">
+                                <p class="text-[10px] text-slate-600 mt-0.5">Counts toward class standing and upper-level eligibility. To remove a specific course from the plan, set its grade below.</p>
                             </div>
-                            <div><label class="block text-[10px] font-bold text-sky-900 mb-0.5">Notes</label>
-                                <textarea name="notes" rows="4" maxlength="3000" placeholder="Advising notes, holds, approvals, questions..." class="w-full p-2 text-xs bg-sky-50 border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-300 focus:outline-none font-medium">{{ student.notes }}</textarea></div>
+                            <div><label class="block text-[10px] font-bold text-sky-900 mb-0.5" for="f_notes">Notes (optional)</label>
+                                <textarea id="f_notes" name="notes" aria-describedby="studentNotice" rows="4" maxlength="3000" placeholder="Advising notes, holds, approvals, questions..." class="w-full p-2 text-xs bg-sky-50 border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-300 focus:outline-none font-medium">{{ student.notes }}</textarea></div>
                         </div>
                     </details>
 
 
                     <!-- Major / Degree Program Selector -->
                     <div>
-                        <label class="block text-xs font-extrabold text-sky-950 mb-1.5">Degree Program</label>
-                        <select name="degree" onchange="this.form.submit()" class="w-full p-2.5 text-xs bg-amber-100/60 border border-amber-300 font-bold text-amber-950 rounded-xl focus:ring-2 focus:ring-amber-400 focus:outline-none cursor-pointer">
+                        <label class="block text-xs font-extrabold text-sky-950 mb-1.5" for="f_degree">Degree Program</label>
+                        <div class="flex gap-2">
+                            <select id="f_degree" name="degree" aria-describedby="degreeHint" data-initial="{{ selected_degree }}" class="min-w-0 flex-1 p-2.5 text-xs bg-amber-100/60 border border-amber-300 font-bold text-amber-950 rounded-xl focus:ring-2 focus:ring-amber-400 focus:outline-none cursor-pointer">
                             {% for key, prog in degree_programs.items() %}
                             <option value="{{ key }}" {% if selected_degree == key %}selected{% endif %}>{{ prog.name }}</option>
                             {% endfor %}
                         </select>
+                            <button type="button" id="loadDegree" disabled class="shrink-0 bg-sky-200 hover:bg-sky-300 disabled:opacity-60 disabled:cursor-not-allowed text-sky-950 font-bold px-3 text-xs rounded-xl border border-sky-300 transition cursor-pointer">Load courses</button>
+                        </div>
+                        <p id="degreeHint" class="text-[11px] text-slate-700 font-medium mt-1">After choosing a different degree, press Load courses to show its course list.</p>
                     </div>
 
                     <!-- Starting Term & Year Selection -->
                     <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-xs font-extrabold text-sky-950 mb-1.5">Start Semester</label>
-                            <select name="start_term" class="w-full p-2.5 text-xs bg-sky-50 border border-sky-200 rounded-xl focus:ring-2 focus:ring-sky-300 focus:outline-none font-medium">
+                            <label class="block text-xs font-extrabold text-sky-950 mb-1.5" for="f_start_term">Start Semester</label>
+                            <select id="f_start_term" name="start_term" class="w-full p-2.5 text-xs bg-sky-50 border border-sky-200 rounded-xl focus:ring-2 focus:ring-sky-300 focus:outline-none font-medium">
                                 <option value="Fall" {% if start_term == 'Fall' %}selected{% endif %}>Fall</option>
                                 <option value="Spring" {% if start_term == 'Spring' %}selected{% endif %}>Spring</option>
+                                {% if settings.include_summer %}<option value="Summer" {% if start_term == 'Summer' %}selected{% endif %}>Summer</option>{% endif %}
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-extrabold text-sky-950 mb-1.5">Start Year</label>
-                            <select name="start_year" class="w-full p-2.5 text-xs bg-sky-50 border border-sky-200 rounded-xl focus:ring-2 focus:ring-sky-300 focus:outline-none font-medium">
+                            <label class="block text-xs font-extrabold text-sky-950 mb-1.5" for="f_start_year">Start Year</label>
+                            <select id="f_start_year" name="start_year" class="w-full p-2.5 text-xs bg-sky-50 border border-sky-200 rounded-xl focus:ring-2 focus:ring-sky-300 focus:outline-none font-medium">
                                 {% for y in range(2025, 2033) %}
                                 <option value="{{ y }}" {% if start_year == y %}selected{% endif %}>{{ y }}</option>
                                 {% endfor %}
@@ -586,10 +626,42 @@
 
                     <!-- Max Credits Input -->
                     <div>
-                        <label class="block text-xs font-extrabold text-sky-950 mb-1.5">Max Credits / Semester</label>
-                        <input type="number" name="max_credits" value="{{ max_credits }}" min="6" max="24"
+                        <label class="block text-xs font-extrabold text-sky-950 mb-1.5" for="f_max_credits">Max Credits / Semester</label>
+                        <input id="f_max_credits" type="number" name="max_credits" value="{{ max_credits }}" min="6" max="24"
                                class="w-full p-2.5 text-xs bg-sky-50 border border-sky-200 rounded-xl focus:ring-2 focus:ring-sky-300 focus:outline-none font-medium">
                     </div>
+
+                    <!-- Planning options: summers, schedule style, cost -->
+                    <details id="planOptions" class="bg-sky-50/60 rounded-xl border border-sky-200 overflow-hidden" {% if settings.include_summer or settings.balance == 'balanced' or settings.tuition_per_credit or settings.fees_per_term %}open{% endif %}>
+                        <summary class="font-extrabold text-xs text-sky-950 p-2.5 bg-sky-100/70 hover:bg-sky-100 cursor-pointer">Planning Options</summary>
+                        <div class="p-3 space-y-3">
+                            <div class="space-y-1.5">
+                                <label class="flex items-center gap-2 text-xs font-bold text-sky-950 cursor-pointer">
+                                    <input type="checkbox" name="include_summer" id="includeSummer" value="1" class="rounded border-sky-300" {% if settings.include_summer %}checked{% endif %}>
+                                    Use summer terms
+                                </label>
+                                <div id="summerRow" class="flex items-center gap-2 pl-6 text-[11px] text-slate-600 font-medium transition-opacity {% if not settings.include_summer %}opacity-50{% endif %}">
+                                    <label for="summerCredits">Summer credit limit</label>
+                                    <input type="number" id="summerCredits" name="summer_credits" min="1" max="12" value="{{ settings.summer_credits }}" class="w-16 p-1.5 text-xs bg-white border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-300 font-semibold text-sky-950">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-sky-900 mb-0.5" for="f_balance">Schedule style</label>
+                                <select id="f_balance" name="balance" class="w-full p-2 text-xs bg-white border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-300 font-semibold text-sky-950">
+                                    <option value="fastest" {% if settings.balance == 'fastest' %}selected{% endif %}>Fastest (fill every semester)</option>
+                                    <option value="balanced" {% if settings.balance == 'balanced' %}selected{% endif %}>Balanced (spread the heavy courses)</option>
+                                </select>
+                                <p class="text-[10px] text-slate-600 mt-0.5">Balanced only changes the plan when it can still finish in the same semester as the fastest one.</p>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div><label class="block text-[10px] font-bold text-sky-900 mb-0.5" for="f_tuition_per_credit">Tuition per credit ($)</label>
+                                    <input id="f_tuition_per_credit" type="number" name="tuition_per_credit" min="0" max="5000" step="0.01" value="{{ ('%g'|format(settings.tuition_per_credit)) if settings.tuition_per_credit else '' }}" placeholder="optional" class="w-full p-2 text-xs bg-white border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-300 font-medium"></div>
+                                <div><label class="block text-[10px] font-bold text-sky-900 mb-0.5" for="f_fees_per_term">Fees per semester ($)</label>
+                                    <input id="f_fees_per_term" type="number" name="fees_per_term" min="0" max="20000" step="0.01" value="{{ ('%g'|format(settings.fees_per_term)) if settings.fees_per_term else '' }}" placeholder="optional" class="w-full p-2 text-xs bg-white border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-300 font-medium"></div>
+                            </div>
+                            <p class="text-[10px] text-slate-600">Enter your own rates from SAU's published tuition schedule to see an estimated total. The planner does not guess rates.</p>
+                        </div>
+                    </details>
 
                     <!-- Categorized Courses, Grades & Earliest Semesters -->
                     <div>
@@ -597,11 +669,21 @@
                             <label class="block text-xs font-extrabold text-sky-950">Courses, Grades & Scheduling Preferences</label>
                         </div>
 
-                        <div class="space-y-2 max-h-[30rem] overflow-y-auto p-2 bg-sky-50/60 rounded-xl border border-sky-200">
+                        <!-- Quick entry: search, hide completed, paste a list -->
+                        <div class="space-y-2 mb-2">
+                            <p class="text-[11px] text-slate-700 font-medium">"Mark done" on a course also marks everything it requires as completed (credit, no grade). You can change the grades afterward.</p>
+                            <div class="flex flex-wrap items-center justify-between gap-2 text-[11px] font-semibold text-slate-700">
+                                <label class="flex items-center gap-2 cursor-pointer select-none"><input type="checkbox" id="hideDone" class="rounded border-sky-300"> Hide completed courses</label>
+                                <span id="filterNote" class="text-slate-600" aria-live="polite"></span>
+                            </div>
+                            <p id="quickNote" class="text-[11px] font-semibold text-sky-900" aria-live="polite"></p>
+                        </div>
+
+                        <div id="courseList" class="space-y-2 max-h-[30rem] overflow-y-auto p-2 bg-sky-50/60 rounded-xl border border-sky-200">
 
                             {% for cat_name, courses in categorized_catalog.items() %}
                             {% set req_grade, _ = get_min_passing_score(cat_name) %}
-                            <details class="group bg-white rounded-xl border border-sky-200 overflow-hidden shadow-sm" open>
+                            <details class="cat-block group bg-white rounded-xl border border-sky-200 overflow-hidden shadow-sm" open>
                                 <summary class="font-bold text-xs text-sky-950 p-2.5 bg-sky-100/70 hover:bg-sky-100 cursor-pointer flex justify-between items-center transition">
                                     <div class="flex items-center gap-2">
                                         <span>{{ cat_name }}</span>
@@ -613,8 +695,15 @@
                                 </summary>
 
                                 <div class="p-2 space-y-2.5 bg-white">
+                                    {% for g in groups_by_category.get(cat_name, []) %}
+                                    <div class="bg-amber-50 border border-amber-200 text-amber-950 rounded-lg p-2 text-[11px] font-semibold">
+                                        Choose {{ g.choose }} of these {{ g.courses|length }}. Tick the ones you want in your plan; the others are left out.
+                                        <span class="font-black" data-group-count="{{ g.id }}"></span>
+                                    </div>
+                                    {% endfor %}
                                     {% for code, details in courses %}
-                                    <div class="p-2 rounded-lg bg-sky-50/40 border border-sky-100 hover:border-sky-300 transition space-y-2">
+                                    {% set grp = group_of.get(code) %}
+                                    <div class="course-card p-2 rounded-lg bg-sky-50/40 border border-sky-100 hover:border-sky-300 transition space-y-2" data-code="{{ code }}" role="group" aria-label="{{ code }}, {{ details.name }}">
 
                                         <!-- Course Header -->
                                         <div class="flex justify-between items-start gap-2">
@@ -627,26 +716,34 @@
                                                 {% if details.offered %}
                                                 <div class="text-[10px] text-amber-900 font-semibold">Offered: {{ details.offered | join(', ') }}</div>
                                                 {% endif %}
+                                                {% if grp %}
+                                                <label class="mt-1 inline-flex items-center gap-1.5 text-[10px] font-bold text-amber-950 cursor-pointer">
+                                                    <input type="checkbox" name="pick_{{ code }}" aria-label="Include {{ code }} in my plan" value="1" data-group="{{ grp.id }}" data-choose="{{ grp.choose }}" class="pick-box rounded border-amber-400" {% if code in picked %}checked{% endif %}>
+                                                    In my plan{% if code in auto_picked %} (picked for you){% endif %}
+                                                </label>
+                                                {% endif %}
                                             </div>
+                                            <button type="button" class="mark-done shrink-0 text-[10px] font-bold bg-sky-100 hover:bg-sky-200 text-sky-950 border border-sky-300 rounded-md px-2 py-1 transition cursor-pointer" data-code="{{ code }}" aria-label="Mark done: {{ code }} and everything it requires" title="Marks this course and everything it requires as completed">Mark done</button>
                                         </div>
 
                                         <!-- Form Inputs (Grade & Earliest Term) -->
                                         <div class="grid grid-cols-2 gap-2 pt-1 border-t border-sky-100/80">
                                             <div>
                                                 <label class="block text-[10px] font-bold text-sky-900 mb-0.5">Completed Grade</label>
-                                                <select name="grade_{{ code }}" class="w-full p-1.5 text-xs bg-white border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-300 font-semibold text-sky-950">
+                                                <select name="grade_{{ code }}" aria-label="Completed grade for {{ code }}" class="w-full p-1.5 text-xs bg-white border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-300 font-semibold text-sky-950">
                                                     <option value="NONE" {% if user_grades.get(code) == 'NONE' or not user_grades.get(code) %}selected{% endif %}>Not Taken</option>
                                                     <option value="A" {% if user_grades.get(code) == 'A' %}selected{% endif %}>Grade: A</option>
                                                     <option value="B" {% if user_grades.get(code) == 'B' %}selected{% endif %}>Grade: B</option>
                                                     <option value="C" {% if user_grades.get(code) == 'C' %}selected{% endif %}>Grade: C</option>
                                                     <option value="D" {% if user_grades.get(code) == 'D' %}selected{% endif %}>Grade: D</option>
                                                     <option value="F" {% if user_grades.get(code) == 'F' %}selected{% endif %}>Grade: F</option>
+                                                    <option value="CR" {% if user_grades.get(code) == 'CR' %}selected{% endif %}>Credit (no grade)</option>
                                                 </select>
                                             </div>
 
                                             <div>
                                                 <label class="block text-[10px] font-bold text-amber-950 mb-0.5">Earliest Term</label>
-                                                <select name="pref_{{ code }}" class="w-full p-1.5 text-xs bg-amber-50/80 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-400 font-semibold text-amber-950">
+                                                <select name="pref_{{ code }}" aria-label="Earliest term for {{ code }}" class="w-full p-1.5 text-xs bg-amber-50/80 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-400 font-semibold text-amber-950">
                                                     <option value="AUTO" {% if preferred_terms.get(code) == 'AUTO' or not preferred_terms.get(code) %}selected{% endif %}>Auto (as soon as possible)</option>
                                                     {% for term_opt in upcoming_terms %}
                                                     <option value="{{ term_opt }}" {% if preferred_terms.get(code) == term_opt %}selected{% endif %}>{{ term_opt }}</option>
@@ -664,8 +761,10 @@
                         </div>
                     </div>
 
+                    <div id="pinFields">{% for code, label in pins.items() %}<input type="hidden" name="pin_{{ code }}" value="{{ label }}">{% endfor %}</div>
+
                     <div class="space-y-2">
-                        <button type="submit" name="action" value="generate"
+                        <button type="submit" name="action" value="generate" id="generateBtn"
                                 class="w-full bg-amber-300 hover:bg-amber-400 text-amber-950 font-black py-2.5 text-xs rounded-xl shadow-sm border border-amber-400 transition {% if catalog %}cursor-pointer{% else %}opacity-50 cursor-not-allowed{% endif %}"
                                 {% if not catalog %}disabled{% endif %}>
                             Generate Degree Schedule
@@ -680,15 +779,27 @@
                                 class="w-full bg-white hover:bg-sky-50 text-sky-950 font-bold py-2 text-xs rounded-xl border border-sky-300 transition cursor-pointer">
                             Save Plan to File
                         </button>
+                        <div class="bg-sky-50/70 border border-sky-200 rounded-xl p-2.5">
+                            <label class="flex items-start gap-2 text-xs font-bold text-sky-950 cursor-pointer">
+                                <input type="checkbox" id="rememberWork" class="mt-0.5 rounded border-sky-300" aria-describedby="rememberHint">
+                                <span>Remember my work on this device</span>
+                            </label>
+                            <p id="rememberHint" class="text-[11px] text-slate-700 font-medium mt-1 pl-7">Off by default. When on, your entries (including any name or notes) are saved in this browser only, so they are here next time. Do not turn this on for a shared or public computer. <a href="/cookies" class="underline text-sky-900">Details</a></p>
+                        </div>
+                        <button type="button" id="startOver"
+                                class="w-full bg-white hover:bg-rose-50 text-rose-900 font-bold py-2 text-xs rounded-xl border border-rose-300 transition cursor-pointer">
+                            Start Over (clear everything saved on this device)
+                        </button>
+                        <p class="text-[11px] text-slate-700 text-center">Downloaded PDFs and plan files include any name and notes you entered. Keep them private.</p>
                     </div>
                 </form>
 
                 <form method="POST" action="/" enctype="multipart/form-data" class="pt-4 border-t border-sky-100 space-y-1.5">
-                    <label class="block text-[10px] font-bold text-sky-900">Load a saved plan</label>
+                    <label for="plan_file" class="block text-[10px] font-bold text-sky-900">Load a saved plan</label>
                     <div class="flex gap-2 items-center">
-                        <input type="file" name="plan_file" accept=".json,application/json" required
+                        <input type="file" id="plan_file" name="plan_file" accept=".json,application/json" required
                                class="min-w-0 flex-1 text-[11px] text-slate-600 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border file:border-sky-300 file:bg-sky-50 file:text-sky-950 file:font-bold file:text-[11px]">
-                        <button type="submit" class="bg-sky-200 hover:bg-sky-300 text-sky-950 font-black px-3 py-1.5 text-xs rounded-lg border border-sky-300 transition cursor-pointer">Load</button>
+                        <button type="submit" class="bg-sky-200 hover:bg-sky-300 text-sky-950 font-black px-3 py-1.5 text-xs rounded-lg border border-sky-300 transition cursor-pointer">Load plan</button>
                     </div>
                 </form>
             </div>
@@ -696,7 +807,7 @@
             <!-- Schedule Display Area (7 Cols) -->
             <div class="lg:col-span-7 space-y-4">
                 <div class="flex justify-between items-center">
-                    <h2 class="text-lg font-black text-sky-950">Optimized Schedule — {{ degree_name }}</h2>
+                    <h2 id="scheduleHeading" class="text-lg font-black text-sky-950">Optimized Schedule — {{ degree_name }}</h2>
                     {% if completed_courses %}
                     <span class="text-xs bg-sky-200/80 text-sky-950 border border-sky-300 px-3 py-1 rounded-full font-extrabold">
                         {{ completed_courses|length }} Courses Passed
@@ -705,8 +816,13 @@
                 </div>
 
                 {% if plan_error %}
-                <div class="bg-rose-50 border border-rose-300 text-rose-950 p-3 rounded-2xl text-xs font-semibold shadow-sm">{{ plan_error }}</div>
+                <div role="alert" class="bg-rose-50 border border-rose-300 text-rose-950 p-3 rounded-2xl text-xs font-semibold shadow-sm">{{ plan_error }}</div>
                 {% endif %}
+
+                <div id="restoreBanner" role="status" class="hidden bg-sky-50 border border-sky-300 text-sky-950 p-3 rounded-2xl text-xs font-semibold shadow-sm flex flex-wrap items-center justify-between gap-2">
+                    <span>Welcome back. Your last plan was restored from this browser.</span>
+                    <button type="button" id="restoreDismiss" aria-label="Dismiss message" class="bg-white hover:bg-sky-100 text-sky-950 font-bold px-2.5 py-1 text-[11px] rounded-lg border border-sky-300 transition cursor-pointer">Dismiss</button>
+                </div>
 
                 {% if generated or student.full_name or student.advisor_name %}
                 <!-- Student Summary -->
@@ -718,7 +834,7 @@
                                 {% if student.student_id %}ID {{ student.student_id }} · {% endif %}{{ degree_name }}{% if student.minor %} · Minor: {{ student.minor }}{% endif %}{% if student.catalog_year %} · Catalog {{ student.catalog_year }}{% endif %}
                             </div>
                             {% if student.advisor_name %}
-                            <div class="text-[11px] text-slate-600 font-medium">Advisor: {{ student.advisor_name }}{% if student.advisor_email %} ({{ student.advisor_email }}){% endif %}</div>
+                            <div class="text-[11px] text-slate-600 font-medium">Advisor: {{ student.advisor_name }}</div>
                             {% endif %}
                         </div>
                         <span class="text-[11px] bg-amber-200/80 text-amber-950 border border-amber-300 px-2.5 py-0.5 rounded-full font-black">{{ summary.classification }}</span>
@@ -741,17 +857,144 @@
                             <div class="text-[10px] font-bold text-slate-600">Projected completion</div>
                         </div>
                     </div>
+                    {% if generated %}
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-center">
+                        <div class="bg-sky-50 border border-sky-100 rounded-xl p-2">
+                            <div class="text-lg font-black text-sky-950">{{ summary.percent if summary.percent is not none else "—" }}{% if summary.percent is not none %}%{% endif %}</div>
+                            <div class="text-[10px] font-bold text-slate-600">Degree complete</div>
+                        </div>
+                        <div class="bg-sky-50 border border-sky-100 rounded-xl p-2">
+                            <div class="text-lg font-black text-sky-950">{{ "%.2f"|format(summary.gpa) if summary.gpa is not none else "—" }}</div>
+                            <div class="text-[10px] font-bold text-slate-600">GPA (entered grades)</div>
+                        </div>
+                        <div class="bg-sky-50 border border-sky-100 rounded-xl p-2">
+                            <div class="text-lg font-black text-sky-950">{% if cost %}{{ "${:,.0f}".format(cost.total) }}{% else %}—{% endif %}</div>
+                            <div class="text-[10px] font-bold text-slate-600">{% if cost %}Estimated cost left{% else %}Add rates for a cost estimate{% endif %}</div>
+                        </div>
+                        <div class="bg-sky-50 border border-sky-100 rounded-xl p-2">
+                            <div class="text-lg font-black text-sky-950">{{ "Balanced" if plan_mode == "balanced" else "Fastest" }}</div>
+                            <div class="text-[10px] font-bold text-slate-600">Schedule style</div>
+                        </div>
+                    </div>
+                    {% if cost %}
+                    <p class="text-[11px] text-slate-600 font-medium">Cost = {{ cost.credits }} credits &times; {{ "${:,.2f}".format(cost.rate) }} + {{ cost.terms }} semesters &times; {{ "${:,.2f}".format(cost.fees) }} fees, using the rates you entered.{% if cost.retake %} Retaking failed courses accounts for {{ "${:,.0f}".format(cost.retake) }} of the tuition.{% endif %}</p>
+                    {% endif %}
+                    {% if settings.balance == 'balanced' and plan_mode != 'balanced' %}
+                    <p class="text-[11px] text-slate-600 font-medium">A balanced plan could not finish as early as the fastest one, so the fastest plan is shown.</p>
+                    {% endif %}
+                    {% endif %}
                     {% if student.notes %}
                     <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-[11px] text-amber-950 whitespace-pre-line"><strong>Notes:</strong> {{ student.notes }}</div>
                     {% endif %}
                 </div>
                 {% endif %}
 
+                {% if generated and pin_conflicts %}
+                <div class="bg-amber-100/90 border border-amber-300 text-amber-950 p-4 rounded-2xl text-xs space-y-1 shadow-sm">
+                    <div class="font-extrabold">Some moves could not be applied:</div>
+                    <ul class="list-disc list-inside space-y-0.5 text-amber-900 font-medium">
+                        {% for c in pin_conflicts %}
+                        <li><strong>{{ c.code }}</strong> to {{ c.term }}: {{ c.reason }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                {% if generated and offering_gaps %}
+                <div class="bg-sky-50 border border-sky-200 text-sky-950 p-3 rounded-2xl text-xs font-medium shadow-sm">
+                    {{ offering_gaps }} of the {{ scheduled_courses }} scheduled courses have no term-offering data, so the planner assumes they are offered every semester. Check the SAU course schedule before registering.
+                </div>
+                {% endif %}
+
+                {% if generated and progress.rows %}
+                <details class="bg-white rounded-2xl shadow-sm border border-sky-200 overflow-hidden" open>
+                    <summary class="cursor-pointer p-4 flex flex-wrap items-center justify-between gap-2 bg-sky-100/70 hover:bg-sky-100 transition">
+                        <span class="font-extrabold text-sm text-sky-950">Progress by Category</span>
+                        <span class="text-[11px] text-sky-900/80 font-medium">{{ progress.overall.done }} done, {{ progress.overall.planned }} planned, {{ progress.overall.total }} credits total</span>
+                    </summary>
+                    <div class="p-4 space-y-3">
+                        {% for row in [{"name": "Whole degree", "total": progress.overall.total, "done": progress.overall.done, "planned": progress.overall.planned, "done_pct": progress.overall.done_pct, "planned_pct": progress.overall.planned_pct}] + progress.rows %}
+                        <div>
+                            <div class="flex justify-between items-baseline text-[11px] font-bold text-sky-950 mb-1">
+                                <span>{{ row.name }}</span>
+                                <span class="font-semibold text-slate-600">{{ row.done }} done · {{ row.planned }} planned · {{ row.total }} total</span>
+                            </div>
+                            <div class="h-2.5 rounded-full bg-sky-100 border border-sky-200 overflow-hidden flex" role="img" aria-label="{{ row.name }}: {{ row.done_pct }}% done, {{ row.planned_pct }}% planned">
+                                <div class="h-full bg-sky-600" style="width: {{ row.done_pct }}%"></div>
+                                <div class="h-full bg-amber-300" style="width: {{ row.planned_pct }}%"></div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        <div class="flex gap-4 text-[11px] font-semibold text-slate-700">
+                            <span class="inline-flex items-center gap-1"><span class="inline-block w-3 h-3 rounded bg-sky-600"></span>Completed</span>
+                            <span class="inline-flex items-center gap-1"><span class="inline-block w-3 h-3 rounded bg-amber-300"></span>Planned</span>
+                        </div>
+                    </div>
+                </details>
+                {% endif %}
+
+                {% if generated and what_if %}
+                <details class="bg-white rounded-2xl shadow-sm border border-sky-200 overflow-hidden">
+                    <summary class="cursor-pointer p-4 flex flex-wrap items-center justify-between gap-2 bg-sky-100/70 hover:bg-sky-100 transition">
+                        <span class="font-extrabold text-sm text-sky-950">What if I take more or fewer credits?</span>
+                        <span class="text-[11px] text-sky-900/80 font-medium">Compare finish dates, with and without summers</span>
+                    </summary>
+                    <div class="p-4 overflow-x-auto">
+                        <table class="w-full text-xs text-left">
+                            <caption class="sr-only">Finish date for different credit loads, with and without summer terms</caption>
+                            <thead>
+                                <tr class="text-[10px] uppercase tracking-wide text-slate-600 border-b border-sky-100">
+                                    <th class="py-1.5 pr-2 font-bold">Credits / term</th>
+                                    <th class="py-1.5 pr-2 font-bold">Summers</th>
+                                    <th class="py-1.5 pr-2 font-bold">Finish</th>
+                                    <th class="py-1.5 pr-2 font-bold">Terms</th>
+                                    {% if cost %}<th class="py-1.5 pr-2 font-bold">Est. cost</th>{% endif %}
+                                    <th class="py-1.5 font-bold"><span class="sr-only">Action</span></th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-sky-100">
+                                {% for r in what_if %}
+                                <tr>
+                                    <td class="py-1.5 pr-2 font-bold text-slate-900">{{ r.cap }}</td>
+                                    <td class="py-1.5 pr-2 text-slate-700">{{ "Yes" if r.summer else "No" }}</td>
+                                    <td class="py-1.5 pr-2 font-semibold text-slate-900">{{ r.finish }}
+                                        {% if r.earliest and what_if|map(attribute="rank")|unique|list|length > 1 %}<span class="ml-1 text-[10px] bg-amber-200/80 text-amber-950 border border-amber-300 px-1.5 py-0.5 rounded-full font-black">Earliest</span>{% endif %}
+                                    </td>
+                                    <td class="py-1.5 pr-2 text-slate-700">{{ r.terms }}</td>
+                                    {% if cost %}<td class="py-1.5 pr-2 text-slate-700">{{ "${:,.0f}".format(r.cost) }}</td>{% endif %}
+                                    <td class="py-1.5 text-right">
+                                        {% if r.current %}<span class="text-[10px] bg-sky-100 text-sky-950 border border-sky-300 px-1.5 py-0.5 rounded-full font-black">Current</span>
+                                        {% else %}<button type="button" class="apply-scenario text-[10px] font-bold bg-sky-100 hover:bg-sky-200 text-sky-950 border border-sky-300 rounded-md px-2 py-1 transition cursor-pointer" data-cap="{{ r.cap }}" data-summer="{{ 1 if r.summer else 0 }}"aria-label="Use these settings: {{ r.cap }} credits per semester, summers {{ 'on' if r.summer else 'off' }}">Use these settings</button>{% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        <p class="text-[11px] text-slate-600 mt-2">Each row re-plans your remaining courses with the same completed courses, pins and preferences. Summers use your summer credit limit.</p>
+                    </div>
+                </details>
+                {% endif %}
+
+                {% if generated and critical %}
+                <details class="bg-white rounded-2xl shadow-sm border border-sky-200 overflow-hidden">
+                    <summary class="cursor-pointer p-4 flex flex-wrap items-center justify-between gap-2 bg-sky-100/70 hover:bg-sky-100 transition">
+                        <span class="font-extrabold text-sm text-sky-950">Keep These on Schedule</span>
+                        <span class="text-[11px] text-sky-900/80 font-medium">{{ critical|length }} course{{ "s" if critical|length != 1 }} where a one-semester slip delays graduation</span>
+                    </summary>
+                    <ul class="p-4 space-y-1.5 text-xs divide-y divide-sky-100">
+                        {% for code, info in critical[:12] %}
+                        <li class="pt-1.5 first:pt-0"><strong class="text-slate-900">{{ code }}</strong> <span class="text-slate-600">— {{ info.name }}, {{ info.term }}.</span>
+                            <span class="text-slate-700 font-medium">If it slips a term, graduation moves from {{ info["from"] }} to {{ info.to }}.</span></li>
+                        {% endfor %}
+                    </ul>
+                </details>
+                {% endif %}
+
                 <!-- Warning Alert for Repeating Failed Courses -->
                 {% if failed_courses %}
-                <div class="bg-amber-100/90 border border-amber-300 text-amber-950 p-4 rounded-2xl text-xs space-y-1 shadow-sm">
+                <div role="alert" class="bg-amber-100/90 border border-amber-300 text-amber-950 p-4 rounded-2xl text-xs space-y-1 shadow-sm">
                     <div class="font-extrabold flex items-center gap-1.5">
-                        <span>⚠️ Minimum Grade Not Met (Must Retake):</span>
+                        <span><span aria-hidden="true">⚠️</span> Minimum Grade Not Met (Must Retake):</span>
                     </div>
                     <ul class="list-disc list-inside space-y-0.5 text-amber-900 font-medium">
                         {% for code, grade, req in failed_courses %}
@@ -763,9 +1006,9 @@
 
                 <!-- Warning Alert for Courses That Could Not Be Scheduled -->
                 {% if unscheduled %}
-                <div class="bg-rose-50 border border-rose-300 text-rose-950 p-4 rounded-2xl text-xs space-y-1 shadow-sm">
+                <div role="alert" class="bg-rose-50 border border-rose-300 text-rose-950 p-4 rounded-2xl text-xs space-y-1 shadow-sm">
                     <div class="font-extrabold flex items-center gap-1.5">
-                        <span>⚠️ Could Not Be Scheduled:</span>
+                        <span><span aria-hidden="true">⚠️</span> Could Not Be Scheduled:</span>
                     </div>
                     <ul class="list-disc list-inside space-y-0.5 text-rose-900 font-medium">
                         {% for item in unscheduled %}
@@ -790,43 +1033,75 @@
                                 Show courses with no prerequisites or dependents
                             </label>
                         </div>
-                        <div id="courseMap" class="overflow-auto max-h-[36rem] rounded-xl border border-sky-100 bg-sky-50/40 p-2"></div>
+                        <div id="courseMap" role="group" aria-label="Prerequisite map. Press Tab to move between courses, Enter to highlight what a course needs and unlocks, Escape to clear." class="overflow-auto max-h-[36rem] rounded-xl border border-sky-100 bg-sky-50/40 p-2"></div>
                     </div>
                 </details>
                 {% endif %}
 
                 {% if schedule %}
+                    {% set critical_codes = critical|map(attribute=0)|list %}
                     {% for sem in schedule %}
                     <div class="bg-white p-5 rounded-2xl shadow-sm border border-sky-200 space-y-3">
                         <div class="flex justify-between items-center pb-2.5 border-b border-sky-100">
                             <h3 class="font-extrabold text-sm text-sky-950">{{ sem.term }}</h3>
-                            <span class="bg-amber-200/80 text-amber-950 border border-amber-300 text-[11px] font-black px-2.5 py-0.5 rounded-full">
-                                {{ sem.credits }} Credits
-                            </span>
+                            <div class="flex items-center gap-2">
+                                {% if sem.heavy %}<span class="text-[11px] bg-rose-50 text-rose-950 border border-rose-300 font-bold px-2 py-0.5 rounded-full">{{ sem.heavy }} heavy</span>{% endif %}
+                                <span class="bg-amber-200/80 text-amber-950 border border-amber-300 text-[11px] font-black px-2.5 py-0.5 rounded-full">
+                                    {{ sem.credits }} Credits
+                                </span>
+                            </div>
                         </div>
                         <ul class="divide-y divide-sky-100 text-xs">
                             {% for course in sem.courses %}
-                            <li class="py-2 flex justify-between items-center">
-                                <div>
+                            <li class="py-2 flex flex-wrap justify-between items-center gap-2">
+                                <div class="min-w-0">
                                     <strong class="text-slate-900 font-bold">{{ course.code }}</strong>
                                     <span class="text-slate-600">— {{ course.name }}</span>
+                                    <div class="mt-1 flex flex-wrap gap-1 text-[10px] font-bold">
+                                        {% if course.difficulty == 3 %}<span class="bg-rose-50 text-rose-950 border border-rose-300 px-1.5 py-0.5 rounded-md">Heavy</span>
+                                        {% elif course.difficulty == 2 %}<span class="bg-amber-50 text-amber-950 border border-amber-300 px-1.5 py-0.5 rounded-md">Moderate</span>
+                                        {% else %}<span class="bg-sky-50 text-sky-900 border border-sky-200 px-1.5 py-0.5 rounded-md">Light</span>{% endif %}
+                                        {% if unlocks.get(course.code) %}<span class="bg-white text-slate-700 border border-slate-300 px-1.5 py-0.5 rounded-md">Unlocks {{ unlocks.get(course.code) }}</span>{% endif %}
+                                        {% if course.code in critical_codes %}<span class="bg-amber-50 text-amber-950 border border-amber-300 px-1.5 py-0.5 rounded-md">Time-sensitive</span>{% endif %}
+                                        {% if course.pinned %}<span class="bg-sky-100 text-sky-950 border border-sky-300 px-1.5 py-0.5 rounded-md">Pinned</span>{% endif %}
+                                    </div>
                                 </div>
-                                <span class="bg-sky-50 text-sky-900 font-bold px-2 py-0.5 rounded-md text-[11px] border border-sky-200">
-                                    {{ course.credits }} cr
-                                </span>
+                                <div class="flex items-center gap-2 shrink-0">
+                                    <select class="move-select p-1 text-[11px] bg-white border border-sky-200 rounded-md focus:ring-2 focus:ring-sky-300 font-semibold text-sky-950 cursor-pointer max-w-[8.5rem]" data-code="{{ course.code }}" aria-label="Move {{ course.code }} to another semester" aria-describedby="moveHint">
+                                        <option value="">Move to…</option>
+                                        {% if course.pinned %}<option value="AUTO">Let planner decide</option>{% endif %}
+                                        {% for t in move_terms if t != sem.term %}<option value="{{ t }}">{{ t }}</option>{% endfor %}
+                                    </select>
+                                    <span class="bg-sky-50 text-sky-900 font-bold px-2 py-0.5 rounded-md text-[11px] border border-sky-200">
+                                        {{ course.credits }} cr
+                                    </span>
+                                </div>
                             </li>
                             {% endfor %}
                         </ul>
                     </div>
                     {% endfor %}
+                    <p class="text-[11px] text-slate-600">Load ratings (Light, Moderate, Heavy) are estimates from course level and subject. Add a "difficulty" of 1 to 3 to a course in its JSON file to set your own. Moving a course pins it to that semester when its prerequisites and offerings allow. With a keyboard, choose a semester in the Move menu and press Enter.</p>
+                    <p id="moveHint" class="sr-only">Choose a semester, then press Enter to move the course.</p>
                 {% else %}
-                    <div class="bg-white p-12 rounded-2xl border border-dashed border-sky-300 text-center text-slate-400 space-y-2">
+                    <div class="bg-white p-12 rounded-2xl border border-dashed border-sky-300 text-center text-slate-600 space-y-2">
                         <p class="text-sm font-medium">Select your degree program, set grades or semester preferences, and click <strong class="text-amber-900">Generate Degree Schedule</strong>.</p>
                     </div>
                 {% endif %}
             </div>
 
-        </div>
+        </main>
+
+        <footer class="text-center text-xs text-slate-700 font-medium pb-2 space-y-1">
+            <p>Plans are estimates to bring to your advisor. Check the official catalog before you register. This is an open source project that anyone can audit.</p>
+            <nav aria-label="Legal">
+                <a href="/privacy" class="inline-block py-1 px-1 text-sky-900 hover:text-sky-950">Privacy Policy</a> &middot;
+                <a href="/terms" class="inline-block py-1 px-1 text-sky-900 hover:text-sky-950">Terms and Conditions</a> &middot;
+                <a href="/cookies" class="inline-block py-1 px-1 text-sky-900 hover:text-sky-950">Cookies and Browser Storage</a> &middot;
+                <a href="/accessibility" class="inline-block py-1 px-1 text-sky-900 hover:text-sky-950">Accessibility</a>{% if operator.source %} &middot;
+                <a href="{{ operator.source }}" target="_blank" rel="noopener" class="inline-block py-1 px-1 text-sky-900 hover:text-sky-950">Open source code (opens in a new tab)</a>{% endif %}
+            </nav>
+        </footer>
     </div>
 
     {% if course_map.nodes %}
@@ -869,7 +1144,7 @@
             });
         }
 
-        let selected = null;
+        let selected = null, refocus = null;
 
         function related(code) {
             // everything the course needs (ancestors) and everything it unlocks (descendants)
@@ -941,14 +1216,14 @@
             return { coords, width, height, label: null };
         }
 
-        function render() {
+        var render = function () {
             host.innerHTML = "";
             buildLegend();
             const { coords, width, height, label } = layout(standaloneToggle.checked);
             const keep = selected ? related(selected) : null;
 
-            const svg = el("svg", { width: width, height: height, viewBox: "0 0 " + width + " " + height, role: "img",
-                "aria-label": "Course prerequisite map" }, host);
+            const svg = el("svg", { width: width, height: height, viewBox: "0 0 " + width + " " + height, role: "group",
+                "aria-label": "Courses and their prerequisites" }, host);
             svg.style.display = "block";
 
             const defs = el("defs", {}, svg);
@@ -988,12 +1263,27 @@
                 const dim = keep && !keep.has(n.code);
                 const g = el("g", { transform: "translate(" + c.x + "," + c.y + ")", opacity: dim ? "0.25" : "1" }, svg);
                 g.style.cursor = "pointer";
-                g.addEventListener("click", ev => { ev.stopPropagation(); selected = (selected === n.code) ? null : n.code; render(); });
+                g.setAttribute("tabindex", "0");
+                g.setAttribute("role", "button");
+                g.setAttribute("data-code", n.code);
+                g.setAttribute("aria-pressed", n.code === selected ? "true" : "false");
+                g.setAttribute("aria-label", n.code + ", " + n.name + ", " + n.credits + " credits, " + LABELS[sk] + (n.term ? ", " + n.term : "") +
+                    (parents[n.code].length ? ". Needs " + parents[n.code].join(", ") : ". No prerequisites") +
+                    (n.unlocks ? ". Unlocks " + n.unlocks : ""));
+                const choose = () => { selected = (selected === n.code) ? null : n.code; refocus = n.code; render(); };
+                g.addEventListener("click", ev => { ev.stopPropagation(); choose(); });
+                g.addEventListener("keydown", ev => {
+                    if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); choose(); }
+                    else if (ev.key === "Escape" && selected) { ev.preventDefault(); selected = null; refocus = n.code; render(); }
+                });
 
                 const tip = el("title", {}, g);
                 tip.textContent = n.code + " — " + n.name + " (" + n.credits + " cr)\n" + n.category +
                     (parents[n.code].length ? "\nNeeds: " + parents[n.code].join(", ") : "") +
-                    (n.term ? "\nScheduled: " + n.term : "");
+                    (n.term ? "\nScheduled: " + n.term : "") +
+                    (n.load ? "\nLoad: " + n.load : "") +
+                    (n.unlocks ? "\nUnlocks " + n.unlocks + " other course" + (n.unlocks === 1 ? "" : "s") : "") +
+                    (n.critical ? "\nA one-semester slip delays graduation" : "");
 
                 const box = el("rect", { width: W, height: H, rx: "8", "stroke-width": n.code === selected ? "3" : "1.5" }, g);
                 box.style.fill = v(sk + "-fill");
@@ -1012,9 +1302,255 @@
 
         standaloneToggle.addEventListener("change", render);
         render();
+        // render() rebuilds the SVG, so put keyboard focus back on the course that was just used
+        const baseRender = render;
+        render = function () {
+            baseRender();
+            if (refocus) { const node = host.querySelector('g[data-code="' + (window.CSS && CSS.escape ? CSS.escape(refocus) : refocus) + '"]'); refocus = null; if (node) node.focus(); }
+        };
     })();
     </script>
     {% endif %}
+
+    <script>
+    (function () {
+        var form = document.getElementById("planForm");
+        if (!form) return;
+        var DATA = {{ catalog_json|tojson }};
+        var STATE = { posted: {{ 'true' if posted else 'false' }}, generated: {{ 'true' if generated else 'false' }} };
+        var CONSENT_KEY = "sauPlannerConsent", SAVE_KEY = "sauPlannerAutosave.v1", SCROLL_KEY = "sauPlannerScroll", RESTORED_KEY = "sauPlannerRestored";
+        var generateBtn = document.getElementById("generateBtn");
+        var courseList = document.getElementById("courseList");
+        var cleared = false;
+
+        function store(area, op, key, value) {
+            try { return op === "get" ? window[area].getItem(key) : op === "set" ? window[area].setItem(key, value) : window[area].removeItem(key); }
+            catch (e) { return null; }
+        }
+
+        // ---- grade selects and cards -------------------------------------------------
+        var gradeSel = {}, cards = {};
+        form.querySelectorAll(".course-card").forEach(function (card) {
+            var code = card.getAttribute("data-code");
+            cards[code] = card;
+            gradeSel[code] = card.querySelector('select[name^="grade_"]');
+        });
+        function gradeOf(code) { return gradeSel[code] ? gradeSel[code].value : "NONE"; }
+        function setGrade(code, grade, onlyIfNone) {
+            var sel = gradeSel[code];
+            if (!sel || (onlyIfNone && sel.value !== "NONE")) return false;
+            sel.value = grade;
+            return true;
+        }
+        function normCode(text) { return String(text).toUpperCase().replace(/[^A-Z0-9_]/g, ""); }
+        function prereqClosure(code) {
+            var seen = {}, stack = [code];
+            while (stack.length) {
+                var c = stack.pop();
+                ((DATA.courses[c] || {}).p || []).forEach(function (p) {
+                    if (DATA.courses[p] && !seen[p]) { seen[p] = 1; stack.push(p); }
+                });
+            }
+            return Object.keys(seen);
+        }
+
+        // ---- hide completed -------------------------------------------------
+        var hideDone = document.getElementById("hideDone"), filterNote = document.getElementById("filterNote");
+        function applyFilter() {
+            var q = "", hide = hideDone.checked, shown = 0, total = 0;
+            Object.keys(cards).forEach(function (code) {
+                var card = cards[code];
+                var match = (!q || card.getAttribute("data-search").indexOf(q) !== -1) && !(hide && gradeOf(code) !== "NONE");
+                card.style.display = match ? "" : "none";
+                total++; if (match) shown++;
+            });
+            form.querySelectorAll(".cat-block").forEach(function (block) {
+                var any = Array.prototype.some.call(block.querySelectorAll(".course-card"), function (c) { return c.style.display !== "none"; });
+                block.style.display = any ? "" : "none";
+                if (any && q) block.open = true;
+            });
+            filterNote.textContent = (q || hide) ? shown + " of " + total + " courses shown" : "";
+        }
+        hideDone.addEventListener("change", applyFilter);
+        form.addEventListener("change", function (e) { if (e.target && e.target.name && e.target.name.indexOf("grade_") === 0) applyFilter(); });
+
+        // ---- mark a course and its prerequisites as done -----------------------------
+        var quickNote = document.getElementById("quickNote");
+        form.addEventListener("click", function (e) {
+            var btn = e.target.closest && e.target.closest(".mark-done");
+            if (!btn) return;
+            var code = btn.getAttribute("data-code");
+            var all = prereqClosure(code).concat([code]), changed = 0;
+            all.forEach(function (c) { if (setGrade(c, "CR", true)) changed++; });
+            quickNote.textContent = changed
+                ? "Marked " + changed + " course" + (changed === 1 ? "" : "s") + " as completed with credit (no grade). Set real grades below if you know them, then generate."
+                : "Nothing to change: " + code + " and its prerequisites already have grades.";
+            applyFilter(); scheduleSave();
+        });
+
+        // ---- choose-N groups ---------------------------------------------------------
+        var order = {}, counts = {};
+        form.querySelectorAll(".pick-box").forEach(function (box) {
+            var g = box.getAttribute("data-group");
+            (order[g] = order[g] || []);
+            if (box.checked) order[g].push(box);
+        });
+        document.querySelectorAll("[data-group-count]").forEach(function (el) { counts[el.getAttribute("data-group-count")] = el; });
+        function showCounts() {
+            Object.keys(counts).forEach(function (g) {
+                var list = order[g] || [], choose = DATA.groups.filter(function (x) { return x.id === g; })[0];
+                counts[g].textContent = "(" + list.length + " of " + (choose ? choose.choose : "?") + " selected)";
+            });
+        }
+        form.addEventListener("change", function (e) {
+            var box = e.target;
+            if (!box.classList || !box.classList.contains("pick-box")) return;
+            var g = box.getAttribute("data-group"), limit = parseInt(box.getAttribute("data-choose"), 10);
+            var list = order[g] = (order[g] || []).filter(function (b) { return b !== box; });
+            if (box.checked) {
+                list.push(box);
+                while (list.length > limit) { list.shift().checked = false; }
+            }
+            showCounts();
+        });
+        showCounts();
+
+        // ---- degree: loads only when the button is pressed, never on arrow keys ------------
+        var degreeSel = document.getElementById("f_degree"), loadDegree = document.getElementById("loadDegree");
+        degreeSel.addEventListener("change", function () { loadDegree.disabled = degreeSel.value === degreeSel.getAttribute("data-initial"); });
+        loadDegree.addEventListener("click", function () { form.requestSubmit(); });
+
+        // ---- summer options ----------------------------------------------------------
+        var summerBox = document.getElementById("includeSummer"), startTerm = document.getElementById("f_start_term"), summerRow = document.getElementById("summerRow");
+        function syncSummer() {
+            var on = summerBox.checked;
+            var opt = Array.prototype.filter.call(startTerm.options, function (o) { return o.value === "Summer"; })[0];
+            if (on && !opt) { var o = document.createElement("option"); o.value = "Summer"; o.textContent = "Summer"; startTerm.appendChild(o); }
+            if (!on && opt) { if (startTerm.value === "Summer") startTerm.value = "Fall"; startTerm.removeChild(opt); }
+            summerRow.classList.toggle("opacity-50", !on);
+        }
+        summerBox.addEventListener("change", syncSummer);
+
+        // ---- submit helpers, scroll memory -------------------------------------------
+        function rememberScroll(includeWindow) {
+            store("sessionStorage", "set", SCROLL_KEY, JSON.stringify({ y: includeWindow ? window.scrollY : null, list: courseList ? courseList.scrollTop : 0 }));
+        }
+        var keepWindowScroll = false;
+        function regenerate(includeWindow) {
+            keepWindowScroll = !!includeWindow;
+            if (form.requestSubmit && generateBtn) form.requestSubmit(generateBtn);
+            else { var h = document.createElement("input"); h.type = "hidden"; h.name = "action"; h.value = "generate"; form.appendChild(h); form.submit(); }
+        }
+        form.addEventListener("submit", function () { rememberScroll(keepWindowScroll); saveNow(); });
+
+        // move a course: pin it to a semester
+        document.addEventListener("change", function (e) {
+            var sel = e.target;
+            if (!sel.classList || !sel.classList.contains("move-select") || !sel.value) return;
+            var code = sel.getAttribute("data-code"), box = document.getElementById("pinFields");
+            var name = "pin_" + code;
+            Array.prototype.slice.call(box.querySelectorAll("input")).forEach(function (i) { if (i.name === name) box.removeChild(i); });
+            if (sel.value !== "AUTO") {
+                var i = document.createElement("input"); i.type = "hidden"; i.name = name; i.value = sel.value; box.appendChild(i);
+            }
+            regenerate(true);
+        });
+
+        // what-if: use another credit load
+        document.addEventListener("click", function (e) {
+            var btn = e.target.closest && e.target.closest(".apply-scenario");
+            if (!btn) return;
+            form.elements["max_credits"].value = btn.getAttribute("data-cap");
+            summerBox.checked = btn.getAttribute("data-summer") === "1";
+            syncSummer();
+            regenerate(true);
+        });
+
+        // ---- autosave in this browser ------------------------------------------------
+        var timer = null;
+        function snapshot() {
+            var fields = [];
+            new FormData(form).forEach(function (v, k) { if (typeof v === "string" && k !== "action") fields.push([k, v]); });
+            return { v: 1, fields: fields, generate: STATE.generated };
+        }
+        var remember = document.getElementById("rememberWork");
+        remember.checked = store("localStorage", "get", CONSENT_KEY) === "1";
+        function saveNow() { if (cleared || !remember.checked) return; store("localStorage", "set", SAVE_KEY, JSON.stringify(snapshot())); }
+        remember.addEventListener("change", function () {
+            if (remember.checked) { store("localStorage", "set", CONSENT_KEY, "1"); saveNow(); }
+            else { clearTimeout(timer); store("localStorage", "remove", CONSENT_KEY); store("localStorage", "remove", SAVE_KEY); }
+        });
+        function scheduleSave() { clearTimeout(timer); timer = setTimeout(saveNow, 300); }
+        form.addEventListener("input", scheduleSave);
+        form.addEventListener("change", scheduleSave);
+        if (STATE.posted) saveNow();
+
+        document.getElementById("startOver").addEventListener("click", function () {
+            if (!window.confirm("Delete everything saved on this device and start with a blank plan?")) return;
+            cleared = true; clearTimeout(timer);
+            store("localStorage", "remove", SAVE_KEY); store("localStorage", "remove", CONSENT_KEY); store("sessionStorage", "remove", SCROLL_KEY); store("sessionStorage", "remove", RESTORED_KEY);
+            window.location.href = "/";
+        });
+
+        // ---- after a reload: banner and scroll position ------------------------------
+        var banner = document.getElementById("restoreBanner");
+        if (STATE.posted && store("sessionStorage", "get", RESTORED_KEY)) {
+            banner.classList.remove("hidden");
+            store("sessionStorage", "remove", RESTORED_KEY);
+        }
+        document.getElementById("restoreDismiss").addEventListener("click", function () { banner.classList.add("hidden"); });
+        var saved = store("sessionStorage", "get", SCROLL_KEY), pendingScroll = null;
+        if (saved && STATE.posted) {
+            store("sessionStorage", "remove", SCROLL_KEY);
+            try { pendingScroll = JSON.parse(saved); } catch (e) {}
+        }
+        syncSummer();
+        applyFilter();
+        if (pendingScroll) {
+            // The page grows after Tailwind finishes styling it, so apply the saved position again once it has.
+            var applyScroll = function () {
+                if (courseList && pendingScroll.list) courseList.scrollTop = pendingScroll.list;
+                if (pendingScroll.y !== null && pendingScroll.y !== undefined) window.scrollTo(0, pendingScroll.y);
+            };
+            applyScroll();
+            window.addEventListener("load", applyScroll);
+            setTimeout(applyScroll, 250);
+            setTimeout(applyScroll, 700);
+        }
+    })();
+    </script>
+
+    <!-- First-visit notice: agree to the Terms before using the planner (answer is remembered on this device) -->
+    <dialog id="termsDialog" aria-labelledby="termsTitle" aria-describedby="termsDesc"
+            class="m-auto w-[min(34rem,calc(100%-2rem))] max-h-[calc(100%-2rem)] overflow-y-auto rounded-2xl border border-sky-200 bg-white p-0 text-slate-800 shadow-2xl backdrop:bg-black/60">
+        <div class="p-6 space-y-3">
+            <h2 id="termsTitle" class="text-lg font-black text-sky-950">Before you start</h2>
+            <div id="termsDesc" class="space-y-2 text-sm text-slate-800">
+                <p>This planner helps you draft a schedule. Its results are estimates, not an official degree audit. Check with your advisor and the official catalog before you register.</p>
+                <ul class="list-disc pl-5 space-y-1">
+                    <li>No account, no cookies, no tracking and no ads.</li>
+                    <li>What you type is sent to this server only to build your plan, and is not stored there.</li>
+                    <li>Saving your work on this device is off unless you turn it on.</li>
+                    <li>It is open source: anyone can read the code and check these claims.</li>
+                </ul>
+                <p>By continuing you agree to the <a href="/terms" target="_blank" rel="noopener" class="underline text-sky-900 font-bold">Terms and Conditions (opens in a new tab)</a>. Please also read the <a href="/privacy" target="_blank" rel="noopener" class="underline text-sky-900 font-bold">Privacy Policy (opens in a new tab)</a> and <a href="/cookies" target="_blank" rel="noopener" class="underline text-sky-900 font-bold">Cookies and Browser Storage (opens in a new tab)</a>.</p>
+            </div>
+            <button id="termsAccept" type="button" class="bg-amber-300 hover:bg-amber-400 text-amber-950 font-black py-2.5 px-5 text-sm rounded-xl shadow-sm border border-amber-400 transition cursor-pointer">I agree and continue</button>
+        </div>
+    </dialog>
+    <script>
+    (function () {
+        var dlg = document.getElementById("termsDialog"), version = {{ operator.updated|tojson }};
+        if (!dlg || typeof dlg.showModal !== "function") return;
+        try { if (localStorage.getItem("sauPlannerTerms") === version) return; } catch (e) {}
+        dlg.addEventListener("cancel", function (e) { e.preventDefault(); });   // must be answered; Escape does not skip it
+        dlg.showModal();
+        document.getElementById("termsAccept").addEventListener("click", function () {
+            try { localStorage.setItem("sauPlannerTerms", version); } catch (e) {}
+            dlg.close();
+        });
+    })();
+    </script>
 
     <!-- Mission dialog (native <dialog>: Esc closes it, focus is trapped and then returned to the button) -->
     <dialog id="missionDialog" aria-label="Our mission"
@@ -1055,8 +1591,6 @@
         var root = document.documentElement;
         function sync() {
             var dark = root.classList.contains("dark");
-            btn.setAttribute("aria-pressed", dark ? "true" : "false");
-            btn.setAttribute("aria-label", dark ? "Switch to light mode" : "Switch to dark mode");
             document.getElementById("themeToggleLabel").textContent = dark ? "Light mode" : "Dark mode";
             document.getElementById("themeIconMoon").style.display = dark ? "none" : "";
             document.getElementById("themeIconSun").style.display = dark ? "" : "none";
