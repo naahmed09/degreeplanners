@@ -1,0 +1,75 @@
+{% extends "legal_base.html" %}
+{% block title %}Privacy Policy{% endblock %}
+{% block content %}
+{% set who = operator.name or "[operator name not set]" %}
+<h1>Privacy Policy</h1>
+<p class="updated">Last updated {{ operator.updated }}</p>
+
+<div class="summary">
+    <p><strong>In short:</strong> the planner has no accounts and no tracking. What you type is used only to build your plan, and it is not saved on the server. Your work stays on your own device, and only if you ask for that.</p>
+</div>
+
+<h2>Who runs this planner</h2>
+<p>{{ who }} ("we", "us") runs this degree planner. For privacy questions contact {% if operator.contact %}<a href="mailto:{{ operator.contact }}">{{ operator.contact }}</a>{% else %}[contact email not set]{% endif %}.</p>
+<p>This planner is a planning aid. It is not the university's registration or records system, and nothing you enter is sent to the university.</p>
+
+<h2>What you enter, and why</h2>
+<p>We only ask for what the planner needs. Everything marked optional can be left empty.</p>
+<div class="tablewrap">
+<table>
+    <thead><tr><th scope="col">Information</th><th scope="col">Why</th><th scope="col">Required?</th></tr></thead>
+    <tbody>
+        <tr><th scope="row">Degree program, start semester and year, credit limits, options</th><td>To build the schedule.</td><td>Yes</td></tr>
+        <tr><th scope="row">Courses you completed, grades, preferred semesters, moves, elective choices, other credits earned</th><td>To work out what is left and when you can take it.</td><td>Yes, to get a personal plan</td></tr>
+        <tr><th scope="row">First and last name, student ID, advisor name, catalog year, minor, notes</th><td>Printed on your PDF and saved plan file so you can bring it to advising.</td><td>Optional</td></tr>
+        <tr><th scope="row">Tuition per credit and fees per semester</th><td>To estimate cost. You type your own rates.</td><td>Optional</td></tr>
+    </tbody>
+</table>
+</div>
+<p>We do not ask for your email address, phone number, home address, date of birth, Social Security number, health or disability information, or financial aid details. Please do not type any of these into the Notes box, because Notes are printed on your PDF and written into your saved plan file.</p>
+
+<h2>What happens to it</h2>
+<ul>
+    <li>When you press <em>Generate Degree Schedule</em>, <em>Export Schedule as PDF</em>, <em>Save Plan to File</em> or <em>Load plan</em>, or move a course, your browser sends the form to this server.</li>
+    <li>The server uses it to calculate the schedule or create the PDF or file, sends the result back, and keeps nothing. It does not use a database and does not write your entries to disk.</li>
+    <li>People running the planner do not read your entries.</li>
+</ul>
+
+<h2>What is saved on your device</h2>
+<ul>
+    <li><strong>Remember my work on this device</strong> is off until you tick it. When on, your entries are saved in this browser only, so the planner can restore them next time. Unticking it, or using <em>Start Over</em>, deletes them.</li>
+    <li>Your light or dark mode choice is remembered after you press the mode button.</li>
+    <li>Files you download (PDF, saved plan) belong to you. Anyone who can open them can read what you put in them, so keep them as private as you would any school record.</li>
+</ul>
+<p>Details are on the <a href="/cookies">Cookies and Browser Storage</a> page.</p>
+
+<h2>Records on the server</h2>
+<p>By default the planner does not log visitors' addresses. The network or hosting service that delivers the planner (for example a school network, a hosting company or a VPN) may keep its own technical logs, such as IP addresses and times of requests, under its own policies.</p>
+
+<h2>Tracking, advertising and third parties</h2>
+<p>The planner uses no analytics, advertising, social media buttons, session replay or fingerprinting, and you can verify that in the open source code. Every script, style and image comes from this server, so your browser does not contact any other website while you use it. We do not sell, rent or share your information.</p>
+
+<h2>Student education records</h2>
+<p>Because the planner does not receive records from the university and does not send anything to it, what you enter is your own working document. If you share a PDF or saved plan with an advisor, that is your choice. The university's own rules apply to its records once it has them.</p>
+
+<h2>Children</h2>
+<p>The planner is meant for college students and prospective students. It is not directed to children under 13, and we do not knowingly collect information from them.</p>
+
+<h2>Your choices and rights</h2>
+<ul>
+    <li>Leave optional boxes empty.</li>
+    <li>Press <em>Start Over</em> to delete everything the planner saved in your browser, or clear this site's data in your browser settings.</li>
+    <li>Because we do not store your entries, there is nothing on our server to access, correct or delete. If you think we hold personal information about you, contact us and we will respond promptly and, where the law gives you rights over that information, honor them.</li>
+</ul>
+
+<h2>Security</h2>
+<p>The server sends security headers that block outside scripts and tell browsers not to cache your plan. If you use a shared or public computer, press <em>Start Over</em> and close the tab when you finish. We recommend that anyone hosting the planner serves it over HTTPS.</p>
+
+<div class="oss">
+<h2>Open source: check for yourself</h2>
+<p>This planner is open source. Its code is public, so anyone, including you, your school or an independent security reviewer, can read it to confirm what it does with your information and whether this policy is accurate. You can read {% if operator.source %}<a href="{{ operator.source }}" target="_blank" rel="noopener">the project's source code (opens in a new tab)</a>{% else %}the project's public source code{% endif %}.</p>
+</div>
+
+<h2>Changes</h2>
+<p>If we change what the planner does with information, we will update this page and its date before the change takes effect.</p>
+{% endblock %}
