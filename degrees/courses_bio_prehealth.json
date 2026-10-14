@@ -2,30 +2,195 @@
   "_metadata": {
     "name": "BS Biology: Pre-Health Biology"
   },
-  "MATH1023": { "name": "College Algebra", "credits": 3, "category": "Mathematics", "prereqs": [] },
-  "MATH1033": { "name": "Plane Trigonometry", "credits": 3, "category": "Mathematics", "prereqs": ["MATH1023"] },
-  "BIOL1203_1201": { "name": "Principles of Biology I and Lab", "credits": 4, "category": "Biology Core", "prereqs": [] },
-  "BIOL1213_1211": { "name": "Principles of Biology II and Lab", "credits": 4, "category": "Biology Core", "prereqs": ["BIOL1203_1201"] },
-  "CHEM1023_1021": { "name": "University Chemistry I and Lab", "credits": 4, "category": "Chemistry", "prereqs": [] },
-  "CHEM1123_1121": { "name": "University Chemistry II and Lab", "credits": 4, "category": "Chemistry", "prereqs": ["CHEM1023_1021"] },
-  "BIOL3033_3031": { "name": "Genetics and Lab", "credits": 4, "category": "Biology Core", "prereqs": ["BIOL1213_1211"] },
-  "CHEM3003_3001": { "name": "Organic Chemistry I and Lab", "credits": 4, "category": "Chemistry", "prereqs": ["CHEM1123_1121"] },
-  "BIOL2063_2061": { "name": "Anatomy & Physiology I and Lab", "credits": 4, "category": "Biology Core", "prereqs": ["BIOL1203_1201"] },
-  "BIOL2073_2071": { "name": "Anatomy & Physiology II and Lab", "credits": 4, "category": "Biology Core", "prereqs": ["BIOL2063_2061"] },
-  "BIOL3043": { "name": "Cell Biology", "credits": 3, "category": "Biology Core", "prereqs": ["BIOL3033_3031", "CHEM3003_3001"] },
-  "CHEM3073_3071": { "name": "Biochemistry I and Lab", "credits": 4, "category": "Chemistry", "prereqs": ["CHEM3003_3001"] },
-  "CHEM3103_3101": { "name": "Organic Chemistry II and Lab", "credits": 4, "category": "Chemistry", "prereqs": ["CHEM3003_3001"] },
-  "SCI1011": { "name": "Pre-Health Colloquium", "credits": 1, "category": "Pre-Health Science", "prereqs": [] },
-  "BIOL4013": { "name": "Ecology", "credits": 3, "category": "Biology Core", "prereqs": ["BIOL1213_1211"] },
-  "PHYS2003_2001": { "name": "College Physics I and Lab", "credits": 4, "category": "Physics", "prereqs": ["MATH1033"] },
-  "PHYS2103_2101": { "name": "College Physics II and Lab", "credits": 4, "category": "Physics", "prereqs": ["PHYS2003_2001"] },
-  "BIOL3023_3021": { "name": "Microbiology and Lab", "credits": 4, "category": "Biology Core", "prereqs": ["BIOL1213_1211"] },
-  "BIOL3763": { "name": "Evolutionary Biology", "credits": 3, "category": "Biology Core", "prereqs": ["BIOL3033_3031"] },
-  "BIOL4503_4501": { "name": "Molecular Biology and Lab", "credits": 4, "category": "Biology Core", "prereqs": ["BIOL3033_3031", "CHEM3003_3001"] },
-  "BIOL4101": { "name": "Biology Colloquium", "credits": 1, "category": "Biology Core", "prereqs": [] },
-  "PREHEALTH_ELEC1": { "name": "Pre-Health Electives (Group I)", "credits": 4, "category": "Pre-Health Electives", "prereqs": [] },
-  "PREHEALTH_ELEC2": { "name": "Pre-Health Electives (Group II)", "credits": 4, "category": "Pre-Health Electives", "prereqs": [] },
-  "PREHEALTH_ELEC3": { "name": "Pre-Health Electives (Group III)", "credits": 3, "category": "Pre-Health Electives", "prereqs": [] },
-  "FREE_ELEC1": { "name": "Unrestricted Electives I", "credits": 6, "category": "General Electives", "prereqs": [] },
-  "FREE_ELEC2": { "name": "Unrestricted Electives II", "credits": 3, "category": "General Electives", "prereqs": [] }
+  "MATH1023": {
+    "name": "College Algebra",
+    "credits": 3,
+    "category": "Mathematics",
+    "prereqs": []
+  },
+  "MATH1033": {
+    "name": "Plane Trigonometry",
+    "credits": 3,
+    "category": "Mathematics",
+    "prereqs": [
+      "MATH1023"
+    ]
+  },
+  "BIOL1203_1201": {
+    "name": "Principles of Biology I and Lab",
+    "credits": 4,
+    "category": "Biology Core",
+    "prereqs": []
+  },
+  "BIOL1213_1211": {
+    "name": "Principles of Biology II and Lab",
+    "credits": 4,
+    "category": "Biology Core",
+    "prereqs": [
+      "BIOL1203_1201"
+    ]
+  },
+  "CHEM1023_1021": {
+    "name": "University Chemistry I and Lab",
+    "credits": 4,
+    "category": "Chemistry",
+    "prereqs": []
+  },
+  "CHEM1123_1121": {
+    "name": "University Chemistry II and Lab",
+    "credits": 4,
+    "category": "Chemistry",
+    "prereqs": [
+      "CHEM1023_1021"
+    ]
+  },
+  "BIOL3033_3031": {
+    "name": "Genetics and Lab",
+    "credits": 4,
+    "category": "Biology Core",
+    "prereqs": [
+      "BIOL1213_1211"
+    ]
+  },
+  "CHEM3003_3001": {
+    "name": "Organic Chemistry I and Lab",
+    "credits": 4,
+    "category": "Chemistry",
+    "prereqs": [
+      "CHEM1123_1121"
+    ]
+  },
+  "BIOL2063_2061": {
+    "name": "Anatomy & Physiology I and Lab",
+    "credits": 4,
+    "category": "Biology Core",
+    "prereqs": [
+      "BIOL1203_1201"
+    ]
+  },
+  "BIOL2073_2071": {
+    "name": "Anatomy & Physiology II and Lab",
+    "credits": 4,
+    "category": "Biology Core",
+    "prereqs": [
+      "BIOL2063_2061"
+    ]
+  },
+  "BIOL3043": {
+    "name": "Cell Biology",
+    "credits": 3,
+    "category": "Biology Core",
+    "prereqs": [
+      "BIOL3033_3031",
+      "CHEM3003_3001"
+    ]
+  },
+  "CHEM3073_3071": {
+    "name": "Biochemistry I and Lab",
+    "credits": 4,
+    "category": "Chemistry",
+    "prereqs": [
+      "CHEM3003_3001"
+    ]
+  },
+  "CHEM3103_3101": {
+    "name": "Organic Chemistry II and Lab",
+    "credits": 4,
+    "category": "Chemistry",
+    "prereqs": [
+      "CHEM3003_3001"
+    ]
+  },
+  "SCI1011": {
+    "name": "Pre-Health Colloquium",
+    "credits": 1,
+    "category": "Pre-Health Science",
+    "prereqs": []
+  },
+  "BIOL4013": {
+    "name": "Ecology",
+    "credits": 3,
+    "category": "Biology Core",
+    "prereqs": [
+      "BIOL1213_1211"
+    ]
+  },
+  "PHYS2003_2001": {
+    "name": "College Physics I and Lab",
+    "credits": 4,
+    "category": "Physics",
+    "prereqs": [
+      "MATH1033"
+    ]
+  },
+  "PHYS2103_2101": {
+    "name": "College Physics II and Lab",
+    "credits": 4,
+    "category": "Physics",
+    "prereqs": [
+      "PHYS2003_2001"
+    ]
+  },
+  "BIOL3023_3021": {
+    "name": "Microbiology and Lab",
+    "credits": 4,
+    "category": "Biology Core",
+    "prereqs": [
+      "BIOL1213_1211"
+    ]
+  },
+  "BIOL3763": {
+    "name": "Evolutionary Biology",
+    "credits": 3,
+    "category": "Biology Core",
+    "prereqs": [
+      "BIOL3033_3031"
+    ]
+  },
+  "BIOL4503_4501": {
+    "name": "Molecular Biology and Lab",
+    "credits": 4,
+    "category": "Biology Core",
+    "prereqs": [
+      "BIOL3033_3031",
+      "CHEM3003_3001"
+    ]
+  },
+  "BIOL4101": {
+    "name": "Biology Colloquium",
+    "credits": 1,
+    "category": "Biology Core",
+    "prereqs": []
+  },
+  "PREHEALTH_ELEC1": {
+    "name": "Pre-Health Electives (Group I)",
+    "credits": 4,
+    "category": "Pre-Health Electives",
+    "prereqs": []
+  },
+  "PREHEALTH_ELEC2": {
+    "name": "Pre-Health Electives (Group II)",
+    "credits": 4,
+    "category": "Pre-Health Electives",
+    "prereqs": []
+  },
+  "PREHEALTH_ELEC3": {
+    "name": "Pre-Health Electives (Group III)",
+    "credits": 3,
+    "category": "Pre-Health Electives",
+    "prereqs": []
+  },
+  "FREE_ELEC1": {
+    "name": "Unrestricted Electives I",
+    "credits": 6,
+    "category": "General Electives",
+    "prereqs": []
+  },
+  "FREE_ELEC2": {
+    "name": "Unrestricted Electives II",
+    "credits": 3,
+    "category": "General Electives",
+    "prereqs": []
+  },
+  "_groups": []
 }
