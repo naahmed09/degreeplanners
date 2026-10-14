@@ -2,27 +2,187 @@
   "_metadata": {
     "name": "BS Engineering"
   },
-  "MATH1525": { "name": "Calculus I", "credits": 5, "category": "Mathematics", "prereqs": [] },
-  "MATH1545": { "name": "Calculus II", "credits": 5, "category": "Mathematics", "prereqs": ["MATH1525"] },
-  "MATH2563": { "name": "Calculus III", "credits": 3, "category": "Mathematics", "prereqs": ["MATH1545"] },
-  "MATH3033": { "name": "Differential Equations", "credits": 3, "category": "Mathematics", "prereqs": ["MATH1545"] },
-  "CHEM1023_1021": { "name": "University Chemistry I and Lab", "credits": 4, "category": "Chemistry", "prereqs": [] },
-  "PHYS2203_2201": { "name": "University Physics I and Lab", "credits": 4, "category": "Physics", "prereqs": ["MATH1525"] },
-  "PHYS2213_2211": { "name": "University Physics II and Lab", "credits": 4, "category": "Physics", "prereqs": ["PHYS2203_2201", "MATH1545"] },
-  "CSC2103_2101": { "name": "Computer Science I and Lab", "credits": 4, "category": "Computer Science", "prereqs": [] },
-  "ENGR1023_1021": { "name": "Intro to Engineering and Lab", "credits": 4, "category": "Engineering", "prereqs": [] },
-  "ENGR1212": { "name": "Engineering Graphics", "credits": 2, "category": "Engineering", "prereqs": [] },
-  "ENGR2033": { "name": "Electrical Circuits I", "credits": 3, "category": "Engineering", "prereqs": ["PHYS2213_2211"] },
-  "ENGR2043": { "name": "Properties of Materials", "credits": 3, "category": "Engineering", "prereqs": ["CHEM1023_1021", "PHYS2203_2201"] },
-  "ENGR2143": { "name": "Statics", "credits": 3, "category": "Engineering", "prereqs": ["PHYS2203_2201", "MATH1525"] },
-  "ENGR2163": { "name": "Dynamics", "credits": 3, "category": "Engineering", "prereqs": ["ENGR2143"] },
-  "ENGR3003": { "name": "Fluid Mechanics", "credits": 3, "category": "Engineering", "prereqs": ["ENGR2163", "MATH3033"] },
-  "ENGR3013": { "name": "Thermodynamics", "credits": 3, "category": "Engineering", "prereqs": ["PHYS2203_2201", "MATH1545"] },
-  "ENGR3023": { "name": "Heat Transfer", "credits": 3, "category": "Engineering", "prereqs": ["ENGR3003", "ENGR3013"] },
-  "ENGR3043": { "name": "Mechanics of Materials", "credits": 3, "category": "Engineering", "prereqs": ["ENGR2143"] },
-  "ENGR3073": { "name": "Engineering Economics", "credits": 3, "category": "Engineering", "prereqs": ["MATH1525"] },
-  "ENGR3083": { "name": "Numerical Methods in Engineering", "credits": 3, "category": "Engineering", "prereqs": ["CSC2103_2101", "MATH3033"] },
-  "ENGR4013": { "name": "Machine Design", "credits": 3, "category": "Engineering", "prereqs": ["ENGR3043", "ENGR2163"] },
-  "ENGR4023": { "name": "Senior Design Project I", "credits": 3, "category": "Engineering", "prereqs": ["ENGR3043"] },
-  "ENGR4123": { "name": "Senior Design Project II", "credits": 3, "category": "Engineering", "prereqs": ["ENGR4023"] }
+  "MATH1525": {
+    "name": "Calculus I",
+    "credits": 5,
+    "category": "Mathematics",
+    "prereqs": []
+  },
+  "MATH1545": {
+    "name": "Calculus II",
+    "credits": 5,
+    "category": "Mathematics",
+    "prereqs": [
+      "MATH1525"
+    ]
+  },
+  "MATH2563": {
+    "name": "Calculus III",
+    "credits": 3,
+    "category": "Mathematics",
+    "prereqs": [
+      "MATH1545"
+    ]
+  },
+  "MATH3033": {
+    "name": "Differential Equations",
+    "credits": 3,
+    "category": "Mathematics",
+    "prereqs": [
+      "MATH1545"
+    ]
+  },
+  "CHEM1023_1021": {
+    "name": "University Chemistry I and Lab",
+    "credits": 4,
+    "category": "Chemistry",
+    "prereqs": []
+  },
+  "PHYS2203_2201": {
+    "name": "University Physics I and Lab",
+    "credits": 4,
+    "category": "Physics",
+    "prereqs": [
+      "MATH1525"
+    ]
+  },
+  "PHYS2213_2211": {
+    "name": "University Physics II and Lab",
+    "credits": 4,
+    "category": "Physics",
+    "prereqs": [
+      "PHYS2203_2201",
+      "MATH1545"
+    ]
+  },
+  "CSC2103_2101": {
+    "name": "Computer Science I and Lab",
+    "credits": 4,
+    "category": "Computer Science",
+    "prereqs": []
+  },
+  "ENGR1023_1021": {
+    "name": "Intro to Engineering and Lab",
+    "credits": 4,
+    "category": "Engineering",
+    "prereqs": []
+  },
+  "ENGR1212": {
+    "name": "Engineering Graphics",
+    "credits": 2,
+    "category": "Engineering",
+    "prereqs": []
+  },
+  "ENGR2033": {
+    "name": "Electrical Circuits I",
+    "credits": 3,
+    "category": "Engineering",
+    "prereqs": [
+      "PHYS2213_2211"
+    ]
+  },
+  "ENGR2043": {
+    "name": "Properties of Materials",
+    "credits": 3,
+    "category": "Engineering",
+    "prereqs": [
+      "CHEM1023_1021",
+      "PHYS2203_2201"
+    ]
+  },
+  "ENGR2143": {
+    "name": "Statics",
+    "credits": 3,
+    "category": "Engineering",
+    "prereqs": [
+      "PHYS2203_2201",
+      "MATH1525"
+    ]
+  },
+  "ENGR2163": {
+    "name": "Dynamics",
+    "credits": 3,
+    "category": "Engineering",
+    "prereqs": [
+      "ENGR2143"
+    ]
+  },
+  "ENGR3003": {
+    "name": "Fluid Mechanics",
+    "credits": 3,
+    "category": "Engineering",
+    "prereqs": [
+      "ENGR2163",
+      "MATH3033"
+    ]
+  },
+  "ENGR3013": {
+    "name": "Thermodynamics",
+    "credits": 3,
+    "category": "Engineering",
+    "prereqs": [
+      "PHYS2203_2201",
+      "MATH1545"
+    ]
+  },
+  "ENGR3023": {
+    "name": "Heat Transfer",
+    "credits": 3,
+    "category": "Engineering",
+    "prereqs": [
+      "ENGR3003",
+      "ENGR3013"
+    ]
+  },
+  "ENGR3043": {
+    "name": "Mechanics of Materials",
+    "credits": 3,
+    "category": "Engineering",
+    "prereqs": [
+      "ENGR2143"
+    ]
+  },
+  "ENGR3073": {
+    "name": "Engineering Economics",
+    "credits": 3,
+    "category": "Engineering",
+    "prereqs": [
+      "MATH1525"
+    ]
+  },
+  "ENGR3083": {
+    "name": "Numerical Methods in Engineering",
+    "credits": 3,
+    "category": "Engineering",
+    "prereqs": [
+      "CSC2103_2101",
+      "MATH3033"
+    ]
+  },
+  "ENGR4013": {
+    "name": "Machine Design",
+    "credits": 3,
+    "category": "Engineering",
+    "prereqs": [
+      "ENGR3043",
+      "ENGR2163"
+    ]
+  },
+  "ENGR4023": {
+    "name": "Senior Design Project I",
+    "credits": 3,
+    "category": "Engineering",
+    "prereqs": [
+      "ENGR3043"
+    ]
+  },
+  "ENGR4123": {
+    "name": "Senior Design Project II",
+    "credits": 3,
+    "category": "Engineering",
+    "prereqs": [
+      "ENGR4023"
+    ]
+  },
+  "_groups": []
 }
