@@ -1,0 +1,232 @@
+{
+  "_metadata": {
+    "name": "Business Administration: Accounting, BBA"
+  },
+  "ECON2103": {
+    "name": "Principles of Microeconomics",
+    "credits": 3,
+    "category": "General Education",
+    "prereqs": []
+  },
+  "ACCT2113": {
+    "name": "Survey of Accounting",
+    "credits": 3,
+    "category": "Business Core",
+    "prereqs": []
+  },
+  "ACCT2003": {
+    "name": "Principles of Accounting",
+    "credits": 3,
+    "category": "Business Core",
+    "prereqs": []
+  },
+  "FIN2003": {
+    "name": "Personal Finance",
+    "credits": 3,
+    "category": "Business Core",
+    "prereqs": []
+  },
+  "ECON2203": {
+    "name": "Principles of Macroeconomics",
+    "credits": 3,
+    "category": "Business Core",
+    "prereqs": []
+  },
+  "GBUS2003": {
+    "name": "Legal Environment of Business",
+    "credits": 3,
+    "category": "Business Core",
+    "prereqs": []
+  },
+  "GBUS2013": {
+    "name": "Statistics and Analytics I",
+    "credits": 3,
+    "category": "Business Core",
+    "prereqs": []
+  },
+  "IS2053": {
+    "name": "Business Information Systems",
+    "credits": 3,
+    "category": "Business Core",
+    "prereqs": []
+  },
+  "MGMT2003": {
+    "name": "Business Communications",
+    "credits": 3,
+    "category": "Business Core",
+    "prereqs": []
+  },
+  "FIN3003": {
+    "name": "Financial Management",
+    "credits": 3,
+    "category": "Business Core",
+    "prereqs": ["ACCT2003"]
+  },
+  "GBUS3183": {
+    "name": "Statistics and Analytics II",
+    "credits": 3,
+    "category": "Business Core",
+    "prereqs": ["GBUS2013"]
+  },
+  "IS3023": {
+    "name": "Introduction to Data Visualization",
+    "credits": 3,
+    "category": "Business Core",
+    "prereqs": ["IS2053"]
+  },
+  "IS3053": {
+    "name": "Managing Information Systems",
+    "credits": 3,
+    "category": "Business Core",
+    "prereqs": ["IS2053"]
+  },
+  "MGMT3023": {
+    "name": "Organizational Theory and Behavior",
+    "credits": 3,
+    "category": "Business Core",
+    "prereqs": []
+  },
+  "MGMT3073": {
+    "name": "Professional Communication Strategies",
+    "credits": 3,
+    "category": "Business Core",
+    "prereqs": ["MGMT2003"]
+  },
+  "MGMT4063": {
+    "name": "Operations Management",
+    "credits": 3,
+    "category": "Business Core",
+    "prereqs": ["GBUS2013"]
+  },
+  "MGMT4093": {
+    "name": "Management Strategy and Policy",
+    "credits": 3,
+    "category": "Business Core",
+    "prereqs": ["FIN3003", "MKTG3033", "MGMT3023"]
+  },
+  "MKTG3033": {
+    "name": "Principles of Marketing",
+    "credits": 3,
+    "category": "Business Core",
+    "prereqs": []
+  },
+  "MGMT4043": {
+    "name": "International Business",
+    "credits": 3,
+    "category": "Business Core",
+    "prereqs": []
+  },
+  "MGMT4313": {
+    "name": "International Studies and Field Experience",
+    "credits": 3,
+    "category": "Business Core",
+    "prereqs": []
+  },
+  "ACCT3003": {
+    "name": "Intermediate Accounting I",
+    "credits": 3,
+    "category": "Accounting Curriculum",
+    "prereqs": ["ACCT2003"]
+  },
+  "ACCT3013": {
+    "name": "Managerial Accounting",
+    "credits": 3,
+    "category": "Accounting Curriculum",
+    "prereqs": ["ACCT2003"]
+  },
+  "ACCT3023": {
+    "name": "Individual Income Tax",
+    "credits": 3,
+    "category": "Accounting Curriculum",
+    "prereqs": ["ACCT2003"]
+  },
+  "ACCT3063": {
+    "name": "Accounting Information Systems",
+    "credits": 3,
+    "category": "Accounting Curriculum",
+    "prereqs": ["ACCT2003", "IS2053"]
+  },
+  "ACCT3103": {
+    "name": "Intermediate Accounting II",
+    "credits": 3,
+    "category": "Accounting Curriculum",
+    "prereqs": ["ACCT3003"]
+  },
+  "ACCT4003": {
+    "name": "Auditing",
+    "credits": 3,
+    "category": "Accounting Curriculum",
+    "prereqs": ["ACCT3103"]
+  },
+  "ACCT3133": {
+    "name": "Fraud Examination and Prevention",
+    "credits": 3,
+    "category": "Accounting Electives",
+    "prereqs": ["ACCT3003"]
+  },
+  "ACCT3983": {
+    "name": "Business Internship in Accounting",
+    "credits": 3,
+    "category": "Accounting Electives",
+    "prereqs": []
+  },
+  "ACCT4013": {
+    "name": "Accounting Data Analytics",
+    "credits": 3,
+    "category": "Accounting Electives",
+    "prereqs": ["ACCT3003"]
+  },
+  "ACCT4033": {
+    "name": "Oil and Gas Accounting",
+    "credits": 3,
+    "category": "Accounting Electives",
+    "prereqs": ["ACCT3003"]
+  },
+  "ACCT4043": {
+    "name": "Advanced Financial Accounting I",
+    "credits": 3,
+    "category": "Accounting Electives",
+    "prereqs": ["ACCT3103"]
+  },
+  "ACCT4053": {
+    "name": "Advanced Financial Accounting II",
+    "credits": 3,
+    "category": "Accounting Electives",
+    "prereqs": ["ACCT4043"]
+  },
+  "ACCT4063": {
+    "name": "Governmental and Nonprofit Accounting",
+    "credits": 3,
+    "category": "Accounting Electives",
+    "prereqs": ["ACCT3003"]
+  },
+  "ACCT4123": {
+    "name": "Advanced Taxation",
+    "credits": 3,
+    "category": "Accounting Electives",
+    "prereqs": ["ACCT3023"]
+  },
+  "ELEC1002": {
+    "name": "General Elective",
+    "credits": 2,
+    "category": "General Electives",
+    "prereqs": []
+  },
+  "_groups": [
+    {
+      "id": "international",
+      "name": "International Business (3 hours)",
+      "choose": 1,
+      "courses": ["MGMT4043", "MGMT4313"]
+    },
+    {
+      "id": "acct_electives",
+      "name": "Accounting Electives (9 hours)",
+      "choose": 3,
+      "courses": [
+        "ACCT3133", "ACCT3983", "ACCT4013", "ACCT4033",
+        "ACCT4043", "ACCT4053", "ACCT4063", "ACCT4123"
+      ]
+    }
+  ]
+}
