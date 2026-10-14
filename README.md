@@ -1,6 +1,6 @@
 # SAU Degree Planner
 
-A free, open source web app that helps Southern Arkansas University (SAU) students turn their degree requirements into a clear semester-by-semester plan, from the first semester to graduation.
+A free, open-source web app that helps Southern Arkansas University (SAU) students turn their degree requirements into a clear semester-by-semester plan, from the first semester to graduation.
 
 Students pick a degree, mark the courses they have already finished, and the planner builds a schedule that respects prerequisites, credit limits and when courses are offered. They can then adjust it, compare options, and bring a finished plan to their advisor.
 
