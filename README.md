@@ -1,8 +1,8 @@
 # SAU Degree Planner
 
-A free, open-source web app that helps Southern Arkansas University (SAU) students turn their degree requirements into a clear semester-by-semester plan, from the first semester to graduation.
+A free, open source web app that helps Southern Arkansas University (SAU) students turn their degree requirements into a clear semester-by-semester plan, from the first semester to graduation.
 
-Students pick a degree, mark the courses they have already finished, and the planner builds a schedule that respects prerequisites, credit limits, and when courses are offered. They can then adjust it, compare options, and bring a finished plan to their advisor.
+Students pick a degree, mark the courses they have already finished, and the planner builds a schedule that respects prerequisites, credit limits and when courses are offered. They can then adjust it, compare options, and bring a finished plan to their advisor.
 
 > **This is a planning aid, not an official record.** Course data, prerequisites and offerings may be incomplete or out of date. Always confirm your plan with your advisor and the official SAU catalog before you register.
 
@@ -98,7 +98,7 @@ Degrees live in `degrees/*.json`, and shared General Education courses in `gen_e
 
 ```json
 {
-  "_metadata": { "name": "BS Engineering" },
+  "_metadata": { "name": "BS Engineering", "category": "Engineering" },
   "MATH1525": {
     "name": "Calculus I",
     "credits": 5,
@@ -124,6 +124,8 @@ Degrees live in `degrees/*.json`, and shared General Education courses in `gen_e
 | `offered` | no | Seasons the course is taught (`Fall`, `Spring`, `Summer`). Assumed every semester if missing. |
 | `min_credits` | no | Credits a student must have earned first. Upper-level courses default to 30 (3000 level) and 60 (4000 level). |
 | `difficulty` | no | 1 light, 2 moderate, 3 heavy. Estimated from the course level and subject if missing. |
+
+**Dropdown grouping.** `_metadata.category` groups degrees in the Degree Program dropdown (for example Biology, Business, Engineering). Categories are sorted A to Z, degrees within each by name, and degrees without a category go under "Other" at the end.
 
 **Choose-N requirements.** Add a `_groups` list to a degree file:
 
