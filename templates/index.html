@@ -595,8 +595,12 @@
                         <label class="block text-xs font-extrabold text-sky-950 mb-1.5" for="f_degree">Degree Program</label>
                         <div class="flex gap-2">
                             <select id="f_degree" name="degree" aria-describedby="degreeHint" data-initial="{{ selected_degree }}" class="min-w-0 flex-1 p-2.5 text-xs bg-amber-100/60 border border-amber-300 font-bold text-amber-950 rounded-xl focus:ring-2 focus:ring-amber-400 focus:outline-none cursor-pointer">
-                            {% for key, prog in degree_programs.items() %}
-                            <option value="{{ key }}" {% if selected_degree == key %}selected{% endif %}>{{ prog.name }}</option>
+                            {% for cat, progs in degree_programs.values()|groupby('category', case_sensitive=True) %}
+                            <optgroup label="{{ cat }}">
+                            {% for prog in progs %}
+                            <option value="{{ prog.key }}" {% if selected_degree == prog.key %}selected{% endif %}>{{ prog.name }}</option>
+                            {% endfor %}
+                            </optgroup>
                             {% endfor %}
                         </select>
                             <button type="button" id="loadDegree" disabled class="shrink-0 bg-sky-200 hover:bg-sky-300 disabled:opacity-60 disabled:cursor-not-allowed text-sky-950 font-bold px-3 text-xs rounded-xl border border-sky-300 transition cursor-pointer">Load courses</button>
