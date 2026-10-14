@@ -2,7 +2,7 @@
 
 Data files
   gen_ed.json        shared General Education courses
-  degrees/*.json     one file per degree: course entries plus "_metadata" and optional "_groups"
+  degrees/*.json     one file per degree: course entries plus "_metadata" (name, optional category) and optional "_groups"
   offerings.json     optional, {"MATH1525": ["Fall", "Spring"], ...}: seasons each course is taught
 
 Optional per-course fields in the JSON files
@@ -51,12 +51,12 @@ app.config["MAX_CONTENT_LENGTH"] = 2 * 1024 * 1024  # saved-plan uploads are tin
 # (Optional: environment variables PLANNER_OPERATOR, PLANNER_CONTACT, PLANNER_LAW and PLANNER_UPDATED
 #  override these, for example on Render.)
 # ---------------------------------------------------------------------------
-OPERATOR_NAME = "Nasif Ahmed"                           # for example "Nasif Ahmed"
-CONTACT_EMAIL = "naahmed6556@muleriders.saumag.edu"                           # for example "you@example.com" (shown publicly on the legal pages)
+OPERATOR_NAME = ""                           # for example "Nasif Ahmed"
+CONTACT_EMAIL = ""                           # for example "you@example.com" (shown publicly on the legal pages)
 GOVERNING_LAW = "the State of Arkansas"      # used in the Terms
 LEGAL_UPDATED = "October 12, 2026"           # change this whenever you change the legal wording
-SOURCE_URL = "https://github.com/naahmed09/SAUDegPlanner"                              # link to the public GitHub repository, for example "https://github.com/you/degree-planner"
-SOURCE_LICENSE = "MIT"                          # the license in your repository's LICENSE file, for example "MIT"
+SOURCE_URL = ""                              # link to the public GitHub repository, for example "https://github.com/you/degree-planner"
+SOURCE_LICENSE = ""                          # the license in your repository's LICENSE file, for example "MIT"
 
 OPERATOR = {
     "name": os.environ.get("PLANNER_OPERATOR", OPERATOR_NAME).strip(),
@@ -150,6 +150,9 @@ def load_json_file(file_path):
         return {}
 
 
+DEFAULT_CATEGORY = "Other"
+
+
 def discover_degree_programs():
     """Dynamically finds all JSON files inside the 'degrees' directory."""
     programs = {}
@@ -165,11 +168,17 @@ def discover_degree_programs():
             meta = data.get("_metadata", {}) if isinstance(data, dict) else {}
             degree_name = meta.get("name", degree_key.replace("_", " ").title())
 
+            category = str(meta.get("category") or "").strip() or DEFAULT_CATEGORY
+
             programs[degree_key] = {
+                "key": degree_key,
                 "name": degree_name,
+                "category": category,
                 "file": file_path,
             }
-    return programs
+    # Group by category (A-Z, "Other" last), then by degree name.
+    ordered = sorted(programs.values(), key=lambda d: (d["category"] == DEFAULT_CATEGORY, d["category"].lower(), d["name"].lower()))
+    return {d["key"]: d for d in ordered}
 
 
 def clean_seasons(value):
