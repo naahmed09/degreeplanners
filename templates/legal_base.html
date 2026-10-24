@@ -1,136 +1,75 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}{% endblock %} | Degree Planner</title>
-    <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='degreeplanners.png') }}">
-    <script>
-    (function () { try { if (localStorage.getItem("theme") === "dark") document.documentElement.classList.add("dark"); } catch (e) {} })();
-    </script>
-    <style>
-        :root {
-            --bg: #e8f4fc; --card: #ffffff; --soft: #f0f9ff; --text: #1e293b; --muted: #475569; --head: #082f49;
-            --link: #075985; --line: #bae6fd; --line-strong: #7dd3fc; --focus: #0369a1; --accent: #fcd34d; --accent-text: #451a03; --accent-line: #f59e0b;
-            --hero-from: #bae6fd; --hero-mid: #e0f2fe; --hero-to: #fef3c7; --chip: #ffffff; --chip-on: #082f49; --chip-on-text: #ffffff;
-            --stripe: #f6fbff; --note-bg: #fffbeb; --note-line: #b45309; --note-text: #451a03; --shadow: 0 1px 3px rgba(8, 47, 73, .12);
-        }
-        html.dark {
-            --bg: #0b1220; --card: #141d2f; --soft: #1a2640; --text: #e2e8f0; --muted: #cbd5e1; --head: #f1f5f9;
-            --link: #7dd3fc; --line: #2c4468; --line-strong: #4a6f9c; --focus: #7dd3fc; --accent: #fcd34d; --accent-text: #451a03; --accent-line: #f59e0b;
-            --hero-from: #123552; --hero-mid: #17283f; --hero-to: #3b3116; --chip: #1a2640; --chip-on: #7dd3fc; --chip-on-text: #082f49;
-            --stripe: #172238; --note-bg: #2a2110; --note-line: #f59e0b; --note-text: #fde68a; --shadow: 0 1px 3px rgba(0, 0, 0, .5);
-        }
-        * { box-sizing: border-box; }
-        html { color-scheme: light; } html.dark { color-scheme: dark; }
-        body { margin: 0; padding: 1.5rem 1rem 3rem; background: var(--bg); color: var(--text); font: 16px/1.7 system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
-        html.theme-anim body, html.theme-anim body * { transition: background-color .35s ease, color .35s ease, border-color .35s ease !important; }
-        .wrap { max-width: 56rem; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.25rem; }
-        a { color: var(--link); text-underline-offset: 3px; }
-        a:hover { text-decoration-thickness: 2px; }
-        :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
-        .skip { position: absolute; left: -9999px; top: .5rem; background: var(--card); color: var(--link); padding: .6rem 1rem; border: 2px solid var(--focus); border-radius: .5rem; font-weight: 800; z-index: 20; }
-        .skip:focus { left: .5rem; }
+{% extends "legal_base.html" %}
+{% block title %}Privacy Policy{% endblock %}
+{% block content %}
+{% set who = operator.name or "[operator name not set]" %}
+<h1>Privacy Policy</h1>
+<p class="updated">Last updated {{ operator.updated }}</p>
 
-        /* header banner, same look as the planner */
-        .hero { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.25rem 1.5rem; border: 1px solid var(--line-strong); border-radius: 1rem; background: linear-gradient(90deg, var(--hero-from), var(--hero-mid) 55%, var(--hero-to)); box-shadow: var(--shadow); }
-        .brand { display: flex; align-items: center; gap: 1rem; text-decoration: none; color: var(--head); }
-        .brand img { height: 3rem; width: auto; display: block; }
-        .brand strong { color: var(--head); display: block; font-size: 1.35rem; line-height: 1.2; font-weight: 800; letter-spacing: -.01em; }
-        .brand span { display: block; font-size: .85rem; color: var(--muted); font-weight: 500; }
-        .hero-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
-        .btn { display: inline-flex; align-items: center; gap: .5rem; min-height: 40px; padding: .5rem 1rem; border-radius: .75rem; border: 1px solid var(--line-strong); background: var(--chip); color: var(--head); font: inherit; font-size: .9rem; font-weight: 700; text-decoration: none; cursor: pointer; }
-        .btn:hover { background: var(--soft); }
-        .btn.primary { background: var(--accent); border-color: var(--accent-line); color: var(--accent-text); font-weight: 800; }
-        .btn.primary:hover { filter: brightness(.96); }
-
-        /* page tabs */
-        nav.tabs ul { list-style: none; display: flex; flex-wrap: wrap; gap: .5rem; margin: 0; padding: 0; }
-        nav.tabs a { display: inline-flex; align-items: center; min-height: 40px; padding: .45rem 1rem; border-radius: 999px; border: 1px solid var(--line-strong); background: var(--chip); color: var(--head); font-size: .92rem; font-weight: 700; text-decoration: none; }
-        nav.tabs a:hover { background: var(--soft); }
-        nav.tabs a[aria-current="page"] { background: var(--chip-on); border-color: var(--chip-on); color: var(--chip-on-text); }
-
-        /* content card */
-        main { background: var(--card); border: 1px solid var(--line); border-radius: 1rem; padding: 2rem clamp(1.25rem, 4vw, 2.75rem) 2.5rem; box-shadow: var(--shadow); }
-        main:focus { outline: none; }
-        h1 { color: var(--head); font-size: clamp(1.7rem, 4vw, 2.2rem); line-height: 1.2; margin: 0 0 .6rem; letter-spacing: -.02em; }
-        h1::after { content: ""; display: block; width: 3.5rem; height: 4px; border-radius: 2px; background: var(--accent-line); margin-top: .75rem; }
-        h2 { color: var(--head); font-size: 1.25rem; line-height: 1.3; margin: 2.25rem 0 .6rem; padding-top: 1.25rem; border-top: 1px solid var(--line); }
-        h2:first-of-type { border-top: 0; padding-top: 0; }
-        p, ul, ol { margin: .6rem 0; } li { margin: .3rem 0; }
-        li::marker { color: var(--muted); }
-        .updated { display: inline-block; margin: .25rem 0 1.25rem; padding: .15rem .75rem; border-radius: 999px; background: var(--soft); border: 1px solid var(--line); color: var(--muted); font-size: .88rem; font-weight: 600; }
-        .summary { background: var(--soft); border: 1px solid var(--line); border-left: 5px solid var(--link); border-radius: .75rem; padding: .5rem 1.1rem; margin: 1rem 0 1.5rem; }
-        .oss { background: var(--soft); border: 1px solid var(--line-strong); border-radius: .75rem; padding: .25rem 1.1rem; margin: 1rem 0; }
-        .oss h2 { border: 0; padding: 0; margin: .75rem 0 .25rem; font-size: 1.1rem; }
-        .setup { margin-bottom: 1.5rem; background: var(--note-bg); border: 1px solid var(--note-line); color: var(--note-text); border-radius: .75rem; padding: .75rem 1rem; }
-        .tablewrap { margin: 1rem 0; border: 1px solid var(--line); border-radius: .75rem; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; font-size: .95rem; }
-        th, td { text-align: left; vertical-align: top; padding: .65rem .85rem; border-bottom: 1px solid var(--line); }
-        thead th { background: var(--soft); color: var(--head); font-weight: 700; }
-        tbody th { color: var(--head); font-weight: 600; }
-        tbody tr:last-child th, tbody tr:last-child td { border-bottom: 0; }
-        tbody tr:nth-child(even) { background: var(--stripe); }
-        code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .88em; background: var(--soft); border: 1px solid var(--line); border-radius: .35rem; padding: .05em .4em; }
-        @media (max-width: 40rem) { table { min-width: 34rem; } .hero { padding: 1rem; } }
-
-        /* footer */
-        footer.site { background: var(--card); border: 1px solid var(--line); border-radius: 1rem; padding: 1rem 1.5rem; color: var(--muted); font-size: .92rem; display: grid; gap: .35rem; box-shadow: var(--shadow); }
-        footer.site p { margin: 0; }
-        footer.site strong { color: var(--head); }
-        @media (prefers-reduced-motion: reduce) { html.theme-anim body, html.theme-anim body * { transition: none !important; } }
-    </style>
-</head>
-<body>
-<a class="skip" href="#main">Skip to main content</a>
-<div class="wrap">
-    <header class="hero">
-        <a class="brand" href="/">
-            <img src="{{ url_for('static', filename='degreeplanners.png') }}" alt="">
-            <span><strong>Degree Planner</strong><span>Open source, course data tuned to SAU</span></span>
-        </a>
-        <div class="hero-actions">
-            <a class="btn primary" href="/">Back to the planner</a>
-            <button class="btn" type="button" id="themeToggle"><span id="themeLabel">Dark mode</span></button>
-        </div>
-    </header>
-
-    <nav class="tabs" aria-label="Policies">
-        <ul>
-            <li><a href="/privacy"{% if request.path == '/privacy' %} aria-current="page"{% endif %}>Privacy Policy</a></li>
-            <li><a href="/terms"{% if request.path == '/terms' %} aria-current="page"{% endif %}>Terms and Conditions</a></li>
-            <li><a href="/cookies"{% if request.path == '/cookies' %} aria-current="page"{% endif %}>Cookies and Browser Storage</a></li>
-            <li><a href="/accessibility"{% if request.path == '/accessibility' %} aria-current="page"{% endif %}>Accessibility</a></li>
-        </ul>
-    </nav>
-
-    <main id="main" tabindex="-1">
-        {% if not operator.configured %}
-        <div class="setup" role="note"><strong>Setup needed:</strong> the person running this planner has not yet filled in who they are. Set <code>OPERATOR_NAME</code> and <code>CONTACT_EMAIL</code> near the top of <code>app.py</code> (and have this wording reviewed by a lawyer or your university) before others use the planner. This notice disappears once they are set.</div>
-        {% endif %}
-        {% block content %}{% endblock %}
-    </main>
-
-    <footer class="site">
-        <p><strong>Open source.</strong> The planner's code is public so anyone can read and audit it.{% if operator.source %} <a href="{{ operator.source }}" target="_blank" rel="noopener">View the source code (opens in a new tab)</a>.{% endif %}</p>
-        <p>Last updated {{ operator.updated }}. Questions: {% if operator.contact %}<a href="mailto:{{ operator.contact }}">{{ operator.contact }}</a>{% else %}[contact email not set]{% endif %}</p>
-    </footer>
+<div class="summary">
+    <p><strong>In short:</strong> the planner has no accounts and no tracking. What you type is used only to build your plan, and it is not saved on the server. Your work stays on your own device, and only if you ask for that.</p>
 </div>
-<script>
-(function () {
-    var btn = document.getElementById("themeToggle"), label = document.getElementById("themeLabel"), root = document.documentElement, timer = null;
-    function sync() { label.textContent = root.classList.contains("dark") ? "Light mode" : "Dark mode"; }
-    btn.addEventListener("click", function () {
-        var dark = !root.classList.contains("dark");
-        if (!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches)) {
-            root.classList.add("theme-anim"); void root.offsetWidth; clearTimeout(timer); timer = setTimeout(function () { root.classList.remove("theme-anim"); }, 450);
-        }
-        root.classList.toggle("dark", dark);
-        try { localStorage.setItem("theme", dark ? "dark" : "light"); } catch (e) {}
-        sync();
-    });
-    sync();
-})();
-</script>
-</body>
-</html>
+
+<h2>Who runs this planner</h2>
+<p>{{ who }} ("we", "us") runs this degree planner. For privacy questions contact {% if operator.contact %}<a href="mailto:{{ operator.contact }}">{{ operator.contact }}</a>{% else %}[contact email not set]{% endif %}.</p>
+<p>This planner is a planning aid. It is not the university's registration or records system, and nothing you enter is sent to the university.</p>
+
+<h2>What you enter, and why</h2>
+<p>We only ask for what the planner needs. Everything marked optional can be left empty.</p>
+<div class="tablewrap">
+<table>
+    <thead><tr><th scope="col">Information</th><th scope="col">Why</th><th scope="col">Required?</th></tr></thead>
+    <tbody>
+        <tr><th scope="row">Degree program, start semester and year, credit limits, options</th><td>To build the schedule.</td><td>Yes</td></tr>
+        <tr><th scope="row">Courses you completed, grades, preferred semesters, moves, elective choices, other credits earned</th><td>To work out what is left and when you can take it.</td><td>Yes, to get a personal plan</td></tr>
+        <tr><th scope="row">First and last name, student ID, advisor name, catalog year, minor, notes</th><td>Printed on your PDF and saved plan file so you can bring it to advising.</td><td>Optional</td></tr>
+        <tr><th scope="row">Tuition per credit and fees per semester</th><td>To estimate cost. You type your own rates.</td><td>Optional</td></tr>
+    </tbody>
+</table>
+</div>
+<p>We do not ask for your email address, phone number, home address, date of birth, Social Security number, health or disability information, or financial aid details. Please do not type any of these into the Notes box, because Notes are printed on your PDF and written into your saved plan file.</p>
+
+<h2>What happens to it</h2>
+<ul>
+    <li>When you press <em>Generate Degree Schedule</em>, <em>Export Schedule as PDF</em>, <em>Save Plan to File</em> or <em>Load plan</em>, or move a course, your browser sends the form to this server.</li>
+    <li>The server uses it to calculate the schedule or create the PDF or file, sends the result back, and keeps nothing. It does not use a database and does not write your entries to disk.</li>
+    <li>People running the planner do not read your entries.</li>
+</ul>
+
+<h2>What is saved on your device</h2>
+<ul>
+    <li><strong>Remember my work on this device</strong> is off until you tick it. When on, your entries are saved in this browser only, so the planner can restore them next time. Unticking it, or using <em>Start Over</em>, deletes them.</li>
+    <li>Your light or dark mode choice is remembered after you press the mode button.</li>
+    <li>Files you download (PDF, saved plan) belong to you. Anyone who can open them can read what you put in them, so keep them as private as you would any school record.</li>
+</ul>
+<p>Details are on the <a href="/cookies">Cookies and Browser Storage</a> page.</p>
+
+<h2>Records on the server</h2>
+<p>By default the planner does not log visitors' addresses. The network or hosting service that delivers the planner (for example a school network, a hosting company or a VPN) may keep its own technical logs, such as IP addresses and times of requests, under its own policies.</p>
+
+<h2>Tracking, advertising and third parties</h2>
+<p>The planner uses no analytics, advertising, social media buttons, session replay or fingerprinting, and you can verify that in the open source code. Every script, style and image comes from this server, so your browser does not contact any other website while you use it. We do not sell, rent or share your information.</p>
+
+<h2>Student education records</h2>
+<p>Because the planner does not receive records from the university and does not send anything to it, what you enter is your own working document. If you share a PDF or saved plan with an advisor, that is your choice. The university's own rules apply to its records once it has them.</p>
+
+<h2>Children</h2>
+<p>The planner is meant for college students and prospective students. It is not directed to children under 13, and we do not knowingly collect information from them.</p>
+
+<h2>Your choices and rights</h2>
+<ul>
+    <li>Leave optional boxes empty.</li>
+    <li>Press <em>Start Over</em> to delete everything the planner saved in your browser, or clear this site's data in your browser settings.</li>
+    <li>Because we do not store your entries, there is nothing on our server to access, correct or delete. If you think we hold personal information about you, contact us and we will respond promptly and, where the law gives you rights over that information, honor them.</li>
+</ul>
+
+<h2>Security</h2>
+<p>The server sends security headers that block outside scripts and tell browsers not to cache your plan. If you use a shared or public computer, press <em>Start Over</em> and close the tab when you finish. We recommend that anyone hosting the planner serves it over HTTPS.</p>
+
+<div class="oss">
+<h2>Open source: check for yourself</h2>
+<p>This planner is open source. Its code is public, so anyone, including you, your school or an independent security reviewer, can read it to confirm what it does with your information and whether this policy is accurate. You can read {% if operator.source %}<a href="{{ operator.source }}" target="_blank" rel="noopener">the project's source code (opens in a new tab)</a>{% else %}the project's public source code{% endif %}.</p>
+</div>
+
+<h2>Changes</h2>
+<p>If we change what the planner does with information, we will update this page and its date before the change takes effect.</p>
+{% endblock %}
