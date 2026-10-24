@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}{% endblock %} | SAU Degree Planner</title>
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='SAU_Logo_NoText_RGB-ai-2.png') }}">
+    <title>{% block title %}{% endblock %} | Degree Planner</title>
+    <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='degreeplanners.png') }}">
     <script>
     (function () { try { if (localStorage.getItem("theme") === "dark") document.documentElement.classList.add("dark"); } catch (e) {} })();
     </script>
@@ -86,8 +86,8 @@
 <div class="wrap">
     <header class="hero">
         <a class="brand" href="/">
-            <img src="{{ url_for('static', filename='SAU_Logo_NoText_RGB-ai-2.png') }}" alt="">
-            <span><strong>SAU Degree Planner</strong><span>Southern Arkansas University</span></span>
+            <img src="{{ url_for('static', filename='degreeplanners.png') }}" alt="">
+            <span><strong>Degree Planner</strong><span>Open source, course data tuned to SAU</span></span>
         </a>
         <div class="hero-actions">
             <a class="btn primary" href="/">Back to the planner</a>
