@@ -1,8 +1,8 @@
-"""SAU Degree Planner.
+"""Degree Planner - degreeplanners. Course data is currently tuned to Southern Arkansas University (SAU); the code is open source and can be adapted to any school (see the README).
 
 Data files
   gen_ed.json        shared General Education courses
-  degrees/*.json     one file per degree: course entries plus "_metadata" (name, optional category) and optional "_groups"
+  degrees/*.json     one file per degree: course entries plus "_metadata" and optional "_groups"
   offerings.json     optional, {"MATH1525": ["Fall", "Spring"], ...}: seasons each course is taught
 
 Optional per-course fields in the JSON files
@@ -52,7 +52,7 @@ app.config["MAX_CONTENT_LENGTH"] = 2 * 1024 * 1024  # saved-plan uploads are tin
 #  override these, for example on Render.)
 # ---------------------------------------------------------------------------
 OPERATOR_NAME = "Nasif Ahmed"                           # for example "Nasif Ahmed"
-CONTACT_EMAIL = "naahmed@degreeplanners.com"                           # for example "you@example.com" (shown publicly on the legal pages)
+CONTACT_EMAIL = "naahmed6556@muleriders.saumag.edu"                           # for example "you@example.com" (shown publicly on the legal pages)
 GOVERNING_LAW = "the State of Arkansas"      # used in the Terms
 LEGAL_UPDATED = "October 23, 2026"           # change this whenever you change the legal wording
 SOURCE_URL = "https://github.com/naahmed09/SAUDegPlanner"                              # link to the public GitHub repository, for example "https://github.com/you/degree-planner"
@@ -94,7 +94,7 @@ TERM_RE = re.compile(r"^(Spring|Summer|Fall) (\d{4})$")
 
 MAX_SEMESTERS = 30  # Safety cap to prevent infinite loops
 
-# Categories whose courses require a C or higher.
+# SCHOOL-SPECIFIC (currently SAU): categories whose courses require a C or higher.
 # Business Core and Information Systems Analytics are major courses, so they
 # follow the "Major core requires C" rule described in get_min_passing_score.
 C_REQUIRED_CATEGORIES = {
@@ -104,7 +104,7 @@ C_REQUIRED_CATEGORIES = {
     "Business Core", "Information Systems Analytics",
 }
 
-# Default "credits completed before you may take this" by catalog level
+# SCHOOL-SPECIFIC (currently SAU): default "credits completed before you may take this" by catalog level
 # (first digit of the 4-digit course number). Override per course with a
 # "min_credits" field in the JSON.
 LEVEL_MIN_CREDITS = {3: 30, 4: 60}
@@ -150,9 +150,6 @@ def load_json_file(file_path):
         return {}
 
 
-DEFAULT_CATEGORY = "Other"
-
-
 def discover_degree_programs():
     """Dynamically finds all JSON files inside the 'degrees' directory."""
     programs = {}
@@ -168,17 +165,11 @@ def discover_degree_programs():
             meta = data.get("_metadata", {}) if isinstance(data, dict) else {}
             degree_name = meta.get("name", degree_key.replace("_", " ").title())
 
-            category = str(meta.get("category") or "").strip() or DEFAULT_CATEGORY
-
             programs[degree_key] = {
-                "key": degree_key,
                 "name": degree_name,
-                "category": category,
                 "file": file_path,
             }
-    # Group by category (A-Z, "Other" last), then by degree name.
-    ordered = sorted(programs.values(), key=lambda d: (d["category"] == DEFAULT_CATEGORY, d["category"].lower(), d["name"].lower()))
-    return {d["key"]: d for d in ordered}
+    return programs
 
 
 def clean_seasons(value):
@@ -1372,7 +1363,7 @@ def save_plan():
     """Downloads every form field as a .json file that can be loaded back later."""
     fields = {k: v for k, v in request.form.items() if plan_field(k)}
     student = read_student(request.form)
-    payload = {"app": "sau-degree-planner", "version": 1, "saved": datetime.date.today().isoformat(), "fields": fields}
+    payload = {"app": "degree-planner", "version": 1, "saved": datetime.date.today().isoformat(), "fields": fields}
     name = f"plan_{file_name_part(student['student_last'], 'student')}_{file_name_part(student['student_first'], 'plan')}.json"
     return Response(
         json.dumps(payload, indent=2),
@@ -1483,7 +1474,7 @@ def export_pdf():
     )
     story.append(Paragraph(meta_text, styles["Normal"]))
     story.append(Spacer(1, 4))
-    story.append(Paragraph("<b>SAU Rules:</b> Major/STEM C or higher, Gen Ed D or higher", styles["Normal"]))
+    story.append(Paragraph("<b>Course data:</b> Southern Arkansas University (SAU) | <b>Grade rules:</b> Major/STEM C or higher, Gen Ed D or higher", styles["Normal"]))
     story.append(Spacer(1, 12))
 
     if m["cost"]:
