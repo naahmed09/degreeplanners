@@ -55,7 +55,7 @@ OPERATOR_NAME = "Nasif Ahmed"                           # for example "Nasif Ahm
 CONTACT_EMAIL = "naahmed6556@muleriders.saumag.edu"                           # for example "you@example.com" (shown publicly on the legal pages)
 GOVERNING_LAW = "the State of Arkansas"      # used in the Terms
 LEGAL_UPDATED = "October 23, 2026"           # change this whenever you change the legal wording
-SOURCE_URL = "https://github.com/naahmed09/SAUDegPlanner"                              # link to the public GitHub repository, for example "https://github.com/you/degree-planner"
+SOURCE_URL = "https://github.com/naahmed09/degreeplanners"                              # link to the public GitHub repository, for example "https://github.com/you/degree-planner"
 SOURCE_LICENSE = "MIT"                          # the license in your repository's LICENSE file, for example "MIT"
 
 OPERATOR = {
